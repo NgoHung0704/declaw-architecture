@@ -1,21 +1,32 @@
 // A semantic, top-down atlas. Districts are software responsibilities, not services.
-export const atlasSize={x:0,y:0,w:1640,h:1040};
+export const atlasSize={x:0,y:0,w:1880,h:1260};
 export const districts={
-  memory:{col:0,row:0,name:'Memory',sub:'Bộ nhớ & két khóa',color:'#997235',icon:'memory',verbs:['Lưu ngữ cảnh','Tìm ký ức','Giữ khóa']},
-  ollama:{col:1,row:0,name:'Ollama',sub:'Dịch vụ mô hình riêng',color:'#8b63b5',icon:'model',verbs:['Chat','Embedding','Classifier']},
-  sanitizer:{col:2,row:0,name:'Sanitizer',sub:'Sàng lọc nội dung',color:'#30846f',icon:'shield',verbs:['Kiểm tra','Giữ phần an toàn','Cách ly']},
-  approval:{col:3,row:0,name:'Approval',sub:'Người dùng quyết định',color:'#b97935',icon:'gate',verbs:['Xem đề xuất','Cho phép','Từ chối']},
-  cli:{col:0,row:1,name:'CLI / REPL',sub:'Cửa vào của người dùng',color:'#527795',icon:'terminal',verbs:['Nhận lệnh','Lắp phiên','Hiện kết quả']},
-  agent:{col:1,row:1,name:'Brain',sub:'Agent loop · LangGraph',color:'#ba6558',icon:'brain',verbs:['Suy luận','Chọn công cụ','Quan sát & lặp']},
-  tools:{col:2,row:1,name:'Tools',sub:'Công cụ có schema',color:'#4d819b',icon:'tools',verbs:['Validate args','Chọn wrapper','Thực thi tool']},
-  workspace:{col:3,row:1,name:'Workspace',sub:'Tệp trong phạm vi cho phép',color:'#8a833e',icon:'folder',verbs:['Đọc / liệt kê','Ghi / di chuyển','Kiểm tra path']},
-  storage:{col:0,row:2,name:'Storage',sub:'SQLite + ChromaDB',color:'#7b77a8',icon:'database',verbs:['Bản ghi SQL','Vector search','Text mã hóa']},
-  documents:{col:1,row:2,name:'Documents',sub:'Lập chỉ mục & truy hồi',color:'#4d8c9a',icon:'documents',verbs:['Parse & chunk','Index','Search & cite']},
-  plugins:{col:2,row:2,name:'Plugins',sub:'Host + worker riêng',color:'#9b7195',icon:'plug',verbs:['Kiểm tra quyền','NDJSON / stdio','Parse tài liệu']},
-  audit:{col:3,row:2,name:'Audit',sub:'Nhật ký & HTTP observer',color:'#7b8072',icon:'ledger',verbs:['Ghi sự kiện','Quan sát httpx','Xuất báo cáo']},
+  cli:{x:40,y:470,w:280,h:240,name:'CLI / REPL',sub:'Cửa vào của người dùng',color:'#527795',icon:'terminal',verbs:['Nhận lệnh','Lắp phiên','Hiện kết quả']},
+  agent:{x:730,y:430,w:420,h:310,hero:true,name:'Brain',sub:'Agent loop · LangGraph',color:'#ba6558',icon:'brain',verbs:['Suy luận','Chọn công cụ','Quan sát & lặp']},
+  tools:{x:1190,y:480,w:330,h:270,name:'Tools',sub:'Công cụ có schema',color:'#4d819b',icon:'tools',verbs:['Validate args','Chọn wrapper','Thực thi tool']},
+  workspace:{x:1580,y:490,w:260,h:240,name:'Workspace',sub:'Tệp trong workspace',color:'#8a833e',icon:'folder',verbs:['Đọc / liệt kê','Ghi / di chuyển','Kiểm tra path']},
+  memory:{x:380,y:150,w:300,h:240,name:'Memory',sub:'Bộ nhớ & két khóa',color:'#997235',icon:'memory',verbs:['Lưu ngữ cảnh','Tìm ký ức','Giữ khóa']},
+  ollama:{x:770,y:100,w:340,h:240,name:'Ollama',sub:'Dịch vụ mô hình riêng',color:'#8b63b5',icon:'model',verbs:['Chat','Embedding','Classifier']},
+  sanitizer:{x:1190,y:150,w:330,h:230,name:'Sanitizer',sub:'Sàng lọc nội dung',color:'#30846f',icon:'shield',verbs:['Kiểm tra','Giữ phần an toàn','Cách ly']},
+  approval:{x:1580,y:200,w:260,h:220,name:'Approval',sub:'Người dùng quyết định',color:'#b97935',icon:'gate',verbs:['Xem đề xuất','Cho phép','Từ chối']},
+  documents:{x:730,y:880,w:420,h:290,hero:true,name:'Documents',sub:'Lập chỉ mục & truy hồi',color:'#4d8c9a',icon:'documents',verbs:['Parse & chunk','Index','Search & cite']},
+  storage:{x:370,y:900,w:280,h:230,name:'Storage',sub:'SQLite + ChromaDB',color:'#7b77a8',icon:'database',verbs:['Bản ghi SQL','Vector search','Text mã hóa']},
+  plugins:{x:1220,y:950,w:280,h:220,name:'Plugins',sub:'Host + worker riêng',color:'#9b7195',icon:'plug',verbs:['Kiểm tra quyền','NDJSON / stdio','Parse tài liệu']},
+  audit:{x:1580,y:875,w:260,h:270,name:'Audit',sub:'Nhật ký & HTTP observer',color:'#7b8072',icon:'ledger',verbs:['Ghi sự kiện','Quan sát httpx','Xuất báo cáo']},
 };
-export const districtBox=id=>({x:60+districts[id].col*400,y:90+districts[id].row*320,w:320,h:230});
-const link=(from,to,label,kind='call',main=false)=>({id:`${from}-${to}`,from,to,label,kind,main});
+export const districtBox=id=>{const {x,y,w,h}=districts[id];return {x,y,w,h};};
+const portHints={
+  'cli-agent':['right','left'],'cli-documents':['bottom','left'],'cli-plugins':['bottom','bottom'],
+  'agent-ollama':['top','bottom'],'agent-tools':['right','left'],
+  'tools-approval':['top','left'],'tools-workspace':['right','left'],'tools-documents':['bottom','right'],
+  'tools-sanitizer':['top','bottom'],'tools-audit':['right','top'],
+  'documents-plugins':['right','left'],'documents-storage':['left','right'],
+  'documents-ollama':['top','left'],'documents-sanitizer':['right','left'],
+  'sanitizer-ollama':['left','right'],'sanitizer-audit':['right','top'],
+  'memory-ollama':['right','left'],'memory-storage':['bottom','top'],
+  'audit-storage':['bottom','bottom'],'plugins-tools':['top','bottom'],
+};
+const link=(from,to,label,kind='call',main=false)=>({id:`${from}-${to}`,from,to,label,kind,main,fromSide:portHints[`${from}-${to}`][0],toSide:portHints[`${from}-${to}`][1]});
 export const connections=[
   link('cli','agent','Lượt chat → graph','call',true),
   link('cli','documents','Lắp stack / chạy index','construct'),
@@ -72,12 +83,21 @@ function collision(a,b,r){
   return a.y>r.y&&a.y<r.y+r.h&&Math.max(a.x,b.x)>r.x&&Math.min(a.x,b.x)<r.x+r.w;
 }
 // Orthogonal visibility routing keeps every wire out of unrelated nodes.
-export function routeGraph(nodes,edges){
+export function routeGraph(nodes,edges,{directional=false}={}){
   const byId=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  const buckets=new Map();
+  if(directional)for(const edge of edges)for(const role of ['from','to']){const key=edge[role]+':'+edge[role+'Side'];if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(edge.id+':'+role);}
+  const anchor=(node,side,edge,role)=>{
+    const items=buckets.get(node.id+':'+side),count=items?.length||1,index=items?.indexOf(edge.id+':'+role)||0;
+    const t=count===1?.5:.28+.44*(index/(count-1));
+    return side==='top'?{x:node.x+node.w*t,y:node.y}:side==='bottom'?{x:node.x+node.w*t,y:node.y+node.h}:side==='left'?{x:node.x,y:node.y+node.h*t}:{x:node.x+node.w,y:node.y+node.h*t};
+  };
+  const offset=(p,side,margin)=>({x:p.x+(side==='right'?margin:side==='left'?-margin:0),y:p.y+(side==='bottom'?margin:side==='top'?-margin:0)});
   return edges.map((edge,i)=>{
-    const a=byId[edge.from],b=byId[edge.to],margin=20+(i%5)*5;
-    const start={x:a.x+a.w,y:a.y+a.h/2},end={x:b.x,y:b.y+b.h/2};
-    const p={x:start.x+margin,y:start.y},q={x:end.x-margin,y:end.y};
+    const a=byId[edge.from],b=byId[edge.to],margin=directional?16+(i%3)*2:20+(i%5)*5;
+    const fromSide=directional?edge.fromSide:'right',toSide=directional?edge.toSide:'left';
+    const start=anchor(a,fromSide,edge,'from'),end=anchor(b,toSide,edge,'to');
+    const p=offset(start,fromSide,margin),q=offset(end,toSide,margin);
     const obstacles=nodes.map(n=>({x:n.x-10,y:n.y-10,w:n.w+20,h:n.h+20}));
     const xs=[...new Set([p.x,q.x,...nodes.flatMap(n=>[n.x-margin,n.x+n.w+margin])])].sort((a,b)=>a-b);
     const ys=[...new Set([p.y,q.y,...nodes.flatMap(n=>[n.y-margin,n.y+n.h+margin])])].sort((a,b)=>a-b);
@@ -103,14 +123,21 @@ export function routeGraph(nodes,edges){
   });
 }
 export const overviewNodes=Object.keys(districts).map(id=>({id,...districtBox(id)}));
-export const overviewRoutes=routeGraph(overviewNodes,connections);
+export const overviewRoutes=routeGraph(overviewNodes,connections,{directional:true});
 const wireMarkup=(routes,cls)=>routes.map(e=>`<g class="wire ${cls} kind-${e.kind}${e.main?' primary':''}" data-wire="${e.id}" data-from="${e.from}" data-to="${e.to}" role="button" tabindex="-1" aria-label="${escapeXML(e.label)}"><path class="wire-hit" d="${e.d}"/><path class="wire-line" d="${e.d}" marker-end="url(#arrow)"/><title>${escapeXML(e.label)}</title></g>`).join('');
 export function overviewSVG(counts){
-  return `<rect class="map-ground" width="1640" height="1040"/><path class="map-grid" d="M0 370H1640M0 690H1640M420 0V1040M820 0V1040M1220 0V1040"/>
-  <text class="map-caption" x="60" y="40">DECLAW / BẢN ĐỒ CHỨC NĂNG</text><text class="map-note" x="1580" y="40" text-anchor="end">MŨI TÊN = CHIỀU YÊU CẦU / DỮ LIỆU</text>
+  const ports=id=>overviewRoutes.flatMap(e=>[...(e.from===id?[{...e.points[0],role:'out'}]:[]),...(e.to===id?[{...e.points.at(-1),role:'in'}]:[])]);
+  return `<defs><pattern id="atlas-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle class="map-dot" cx="2" cy="2" r="1"/></pattern></defs><rect class="map-ground" width="1880" height="1260"/><rect width="1880" height="1260" fill="url(#atlas-dots)"/>
+  <rect class="semantic-region context-region" x="350" y="83" width="810" height="325" rx="26"/><rect class="semantic-region execution-region" x="1170" y="127" width="690" height="655" rx="26"/><rect class="semantic-region documents-region" x="340" y="856" width="1180" height="342" rx="26"/>
+  <text class="map-caption" x="40" y="38">DECLAW / KIẾN TRÚC THEO LUỒNG XỬ LÝ</text><text class="map-note" x="1840" y="38" text-anchor="end">NHẬP → ĐIỀU PHỐI → THỰC THI</text>
+  <text class="region-label" x="380" y="70">MÔ HÌNH &amp; NGỮ CẢNH</text><text class="region-label" x="1190" y="110">CÔNG CỤ &amp; KIỂM SOÁT</text><text class="region-label" x="370" y="840">TÀI LIỆU &amp; LƯU TRỮ</text><text class="region-label" x="1580" y="850">QUAN SÁT</text>
+  <text class="axis-label" x="40" y="447">01 / NHẬP YÊU CẦU</text><text class="axis-label" x="730" y="405">02 / ĐIỀU PHỐI TRUNG TÂM</text><text class="axis-label" x="1190" y="455">03 / THỰC THI</text>
   ${wireMarkup(overviewRoutes,'overview-wire')}
-  ${Object.entries(districts).map(([id,d])=>{const b=districtBox(id);return `<g class="district" data-district="${id}" transform="translate(${b.x} ${b.y})" style="--zone:${d.color}" role="button" tabindex="0" aria-label="Khám phá ${d.name}"><rect class="district-shadow" x="0" y="7" width="320" height="230" rx="18"/><rect class="district-land" width="320" height="230" rx="18"/><path class="district-topline" d="M24 2H296"/><text class="district-name" x="24" y="39">${d.name}</text><text class="district-sub" x="24" y="64">${d.sub}</text><g transform="translate(19 77) scale(.88)">${landmark(id)}</g>${d.verbs.map((v,i)=>`<text class="district-verb" x="157" y="111" dy="${i*25}">${v}</text>`).join('')}<path class="district-divider" d="M24 192H296"/><text class="district-count" x="24" y="215">${counts[id]} hàm / class</text><text class="district-open" x="296" y="215" text-anchor="end">Khám phá ↗</text><circle class="port in-port" cx="0" cy="115" r="5"/><circle class="port out-port" cx="320" cy="115" r="5"/></g>`;}).join('')}
-  <text class="map-note" x="60" y="1016">Các khu = trách nhiệm phần mềm. Lõi Python dùng chung tiến trình; Ollama và worker plugin chạy riêng.</text>`;
+  ${Object.entries(districts).map(([id,d])=>{
+    const b=districtBox(id),hero=!!d.hero,compact=b.w<300,scale=hero?1.15:compact?.76:.92,verbX=hero?218:compact?131:159;
+    return `<g class="district${hero?' hero':''}${compact?' compact':''}" data-district="${id}" transform="translate(${b.x} ${b.y})" style="--zone:${d.color}" role="button" tabindex="0" aria-label="Khám phá ${d.name}"><rect class="district-shadow" y="7" width="${b.w}" height="${b.h}" rx="18"/><rect class="district-land" width="${b.w}" height="${b.h}" rx="18"/><path class="district-topline" d="M24 2H${b.w-24}"/><text class="district-name" x="24" y="${hero?48:39}">${d.name}</text><text class="district-sub" x="24" y="${hero?78:64}">${d.sub}</text><g transform="translate(${hero?28:compact?10:19} ${hero?92:80}) scale(${scale})">${landmark(id)}</g>${d.verbs.map((v,i)=>`<text class="district-verb" x="${verbX}" y="${hero?139:111}" dy="${i*(hero?31:25)}">${v}</text>`).join('')}<path class="district-divider" d="M24 ${b.h-38}H${b.w-24}"/><text class="district-count" x="24" y="${b.h-15}">${counts[id]} hàm / class</text><text class="district-open" x="${b.w-24}" y="${b.h-15}" text-anchor="end">Khám phá ↗</text>${ports(id).map(p=>`<circle class="port ${p.role}-port" cx="${p.x-b.x}" cy="${p.y-b.y}" r="5"/>`).join('')}<g class="journey-badge" data-badge="${id}" transform="translate(${b.w-20} -14)" hidden><rect x="-39" y="-15" width="78" height="30" rx="15"/><text text-anchor="middle" y="5"></text></g></g>`;
+  }).join('')}
+  `;
 }
 export function interiorLayout(graph){
   const cols=graph.nodes.length>6?4:3,w=cols===4?300:360;

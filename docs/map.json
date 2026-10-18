@@ -3,62 +3,18 @@
     "repo": "https://github.com/NgoHung0704/DeClaw",
     "commit": "2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed"
   },
+  "atlasSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1880,
+    "h": 1260
+  },
   "districts": {
-    "memory": {
-      "col": 0,
-      "row": 0,
-      "name": "Memory",
-      "sub": "Bộ nhớ & két khóa",
-      "color": "#997235",
-      "icon": "memory",
-      "verbs": [
-        "Lưu ngữ cảnh",
-        "Tìm ký ức",
-        "Giữ khóa"
-      ]
-    },
-    "ollama": {
-      "col": 1,
-      "row": 0,
-      "name": "Ollama",
-      "sub": "Dịch vụ mô hình riêng",
-      "color": "#8b63b5",
-      "icon": "model",
-      "verbs": [
-        "Chat",
-        "Embedding",
-        "Classifier"
-      ]
-    },
-    "sanitizer": {
-      "col": 2,
-      "row": 0,
-      "name": "Sanitizer",
-      "sub": "Sàng lọc nội dung",
-      "color": "#30846f",
-      "icon": "shield",
-      "verbs": [
-        "Kiểm tra",
-        "Giữ phần an toàn",
-        "Cách ly"
-      ]
-    },
-    "approval": {
-      "col": 3,
-      "row": 0,
-      "name": "Approval",
-      "sub": "Người dùng quyết định",
-      "color": "#b97935",
-      "icon": "gate",
-      "verbs": [
-        "Xem đề xuất",
-        "Cho phép",
-        "Từ chối"
-      ]
-    },
     "cli": {
-      "col": 0,
-      "row": 1,
+      "x": 40,
+      "y": 470,
+      "w": 280,
+      "h": 240,
       "name": "CLI / REPL",
       "sub": "Cửa vào của người dùng",
       "color": "#527795",
@@ -70,8 +26,11 @@
       ]
     },
     "agent": {
-      "col": 1,
-      "row": 1,
+      "x": 730,
+      "y": 430,
+      "w": 420,
+      "h": 310,
+      "hero": true,
       "name": "Brain",
       "sub": "Agent loop · LangGraph",
       "color": "#ba6558",
@@ -83,8 +42,10 @@
       ]
     },
     "tools": {
-      "col": 2,
-      "row": 1,
+      "x": 1190,
+      "y": 480,
+      "w": 330,
+      "h": 270,
       "name": "Tools",
       "sub": "Công cụ có schema",
       "color": "#4d819b",
@@ -96,10 +57,12 @@
       ]
     },
     "workspace": {
-      "col": 3,
-      "row": 1,
+      "x": 1580,
+      "y": 490,
+      "w": 260,
+      "h": 240,
       "name": "Workspace",
-      "sub": "Tệp trong phạm vi cho phép",
+      "sub": "Tệp trong workspace",
       "color": "#8a833e",
       "icon": "folder",
       "verbs": [
@@ -108,22 +71,72 @@
         "Kiểm tra path"
       ]
     },
-    "storage": {
-      "col": 0,
-      "row": 2,
-      "name": "Storage",
-      "sub": "SQLite + ChromaDB",
-      "color": "#7b77a8",
-      "icon": "database",
+    "memory": {
+      "x": 380,
+      "y": 150,
+      "w": 300,
+      "h": 240,
+      "name": "Memory",
+      "sub": "Bộ nhớ & két khóa",
+      "color": "#997235",
+      "icon": "memory",
       "verbs": [
-        "Bản ghi SQL",
-        "Vector search",
-        "Text mã hóa"
+        "Lưu ngữ cảnh",
+        "Tìm ký ức",
+        "Giữ khóa"
+      ]
+    },
+    "ollama": {
+      "x": 770,
+      "y": 100,
+      "w": 340,
+      "h": 240,
+      "name": "Ollama",
+      "sub": "Dịch vụ mô hình riêng",
+      "color": "#8b63b5",
+      "icon": "model",
+      "verbs": [
+        "Chat",
+        "Embedding",
+        "Classifier"
+      ]
+    },
+    "sanitizer": {
+      "x": 1190,
+      "y": 150,
+      "w": 330,
+      "h": 230,
+      "name": "Sanitizer",
+      "sub": "Sàng lọc nội dung",
+      "color": "#30846f",
+      "icon": "shield",
+      "verbs": [
+        "Kiểm tra",
+        "Giữ phần an toàn",
+        "Cách ly"
+      ]
+    },
+    "approval": {
+      "x": 1580,
+      "y": 200,
+      "w": 260,
+      "h": 220,
+      "name": "Approval",
+      "sub": "Người dùng quyết định",
+      "color": "#b97935",
+      "icon": "gate",
+      "verbs": [
+        "Xem đề xuất",
+        "Cho phép",
+        "Từ chối"
       ]
     },
     "documents": {
-      "col": 1,
-      "row": 2,
+      "x": 730,
+      "y": 880,
+      "w": 420,
+      "h": 290,
+      "hero": true,
       "name": "Documents",
       "sub": "Lập chỉ mục & truy hồi",
       "color": "#4d8c9a",
@@ -134,9 +147,26 @@
         "Search & cite"
       ]
     },
+    "storage": {
+      "x": 370,
+      "y": 900,
+      "w": 280,
+      "h": 230,
+      "name": "Storage",
+      "sub": "SQLite + ChromaDB",
+      "color": "#7b77a8",
+      "icon": "database",
+      "verbs": [
+        "Bản ghi SQL",
+        "Vector search",
+        "Text mã hóa"
+      ]
+    },
     "plugins": {
-      "col": 2,
-      "row": 2,
+      "x": 1220,
+      "y": 950,
+      "w": 280,
+      "h": 220,
       "name": "Plugins",
       "sub": "Host + worker riêng",
       "color": "#9b7195",
@@ -148,8 +178,10 @@
       ]
     },
     "audit": {
-      "col": 3,
-      "row": 2,
+      "x": 1580,
+      "y": 875,
+      "w": 260,
+      "h": 270,
       "name": "Audit",
       "sub": "Nhật ký & HTTP observer",
       "color": "#7b8072",
@@ -169,17 +201,27 @@
       "label": "Lượt chat → graph",
       "kind": "call",
       "main": true,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 380,
-          "y": 525
+          "x": 320,
+          "y": 590
         },
         {
-          "x": 460,
-          "y": 525
+          "x": 714,
+          "y": 590
+        },
+        {
+          "x": 714,
+          "y": 585
+        },
+        {
+          "x": 730,
+          "y": 585
         }
       ],
-      "d": "M380 525 L460 525"
+      "d": "M320 590 L714 590 L714 585 L730 585"
     },
     {
       "id": "cli-documents",
@@ -188,25 +230,31 @@
       "label": "Lắp stack / chạy index",
       "kind": "construct",
       "main": false,
+      "fromSide": "bottom",
+      "toSide": "left",
       "points": [
         {
-          "x": 380,
-          "y": 525
+          "x": 118.4,
+          "y": 710
         },
         {
-          "x": 435,
-          "y": 525
+          "x": 118.4,
+          "y": 728
         },
         {
-          "x": 435,
-          "y": 845
+          "x": 712,
+          "y": 728
         },
         {
-          "x": 460,
-          "y": 845
+          "x": 712,
+          "y": 961.2
+        },
+        {
+          "x": 730,
+          "y": 961.2
         }
       ],
-      "d": "M380 525 L435 525 L435 845 L460 845"
+      "d": "M118.4 710 L118.4 728 L712 728 L712 961.2 L730 961.2"
     },
     {
       "id": "cli-plugins",
@@ -215,33 +263,27 @@
       "label": "Load plugin trong phiên",
       "kind": "construct",
       "main": false,
+      "fromSide": "bottom",
+      "toSide": "bottom",
       "points": [
         {
-          "x": 380,
-          "y": 525
+          "x": 241.6,
+          "y": 710
         },
         {
-          "x": 410,
-          "y": 525
+          "x": 241.6,
+          "y": 1190
         },
         {
-          "x": 410,
-          "y": 700
+          "x": 1360,
+          "y": 1190
         },
         {
-          "x": 830,
-          "y": 700
-        },
-        {
-          "x": 830,
-          "y": 845
-        },
-        {
-          "x": 860,
-          "y": 845
+          "x": 1360,
+          "y": 1170
         }
       ],
-      "d": "M380 525 L410 525 L410 700 L830 700 L830 845 L860 845"
+      "d": "M241.6 710 L241.6 1190 L1360 1190 L1360 1170"
     },
     {
       "id": "agent-ollama",
@@ -250,33 +292,19 @@
       "label": "Messages → AIMessage",
       "kind": "call",
       "main": true,
+      "fromSide": "top",
+      "toSide": "bottom",
       "points": [
         {
-          "x": 780,
-          "y": 525
+          "x": 940,
+          "y": 430
         },
         {
-          "x": 815,
-          "y": 525
-        },
-        {
-          "x": 815,
-          "y": 355
-        },
-        {
-          "x": 425,
-          "y": 355
-        },
-        {
-          "x": 425,
-          "y": 205
-        },
-        {
-          "x": 460,
-          "y": 205
+          "x": 940,
+          "y": 340
         }
       ],
-      "d": "M780 525 L815 525 L815 355 L425 355 L425 205 L460 205"
+      "d": "M940 430 L940 340"
     },
     {
       "id": "agent-tools",
@@ -285,17 +313,27 @@
       "label": "Tool calls → observations",
       "kind": "call",
       "main": true,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 780,
-          "y": 525
+          "x": 1150,
+          "y": 585
         },
         {
-          "x": 860,
-          "y": 525
+          "x": 1172,
+          "y": 585
+        },
+        {
+          "x": 1172,
+          "y": 615
+        },
+        {
+          "x": 1190,
+          "y": 615
         }
       ],
-      "d": "M780 525 L860 525"
+      "d": "M1150 585 L1172 585 L1172 615 L1190 615"
     },
     {
       "id": "tools-approval",
@@ -304,25 +342,31 @@
       "label": "Non-READ → xác nhận",
       "kind": "branch",
       "main": true,
+      "fromSide": "top",
+      "toSide": "left",
       "points": [
         {
-          "x": 1180,
-          "y": 525
+          "x": 1282.4,
+          "y": 480
         },
         {
-          "x": 1240,
-          "y": 525
+          "x": 1282.4,
+          "y": 460
         },
         {
-          "x": 1240,
-          "y": 205
+          "x": 1560,
+          "y": 460
         },
         {
-          "x": 1260,
-          "y": 205
+          "x": 1560,
+          "y": 310
+        },
+        {
+          "x": 1580,
+          "y": 310
         }
       ],
-      "d": "M1180 525 L1240 525 L1240 205 L1260 205"
+      "d": "M1282.4 480 L1282.4 460 L1560 460 L1560 310 L1580 310"
     },
     {
       "id": "tools-workspace",
@@ -331,17 +375,27 @@
       "label": "Chạy tool filesystem",
       "kind": "call",
       "main": true,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 1180,
-          "y": 525
+          "x": 1520,
+          "y": 555.6
         },
         {
-          "x": 1260,
-          "y": 525
+          "x": 1564,
+          "y": 555.6
+        },
+        {
+          "x": 1564,
+          "y": 610
+        },
+        {
+          "x": 1580,
+          "y": 610
         }
       ],
-      "d": "M1180 525 L1260 525"
+      "d": "M1520 555.6 L1564 555.6 L1564 610 L1580 610"
     },
     {
       "id": "tools-documents",
@@ -350,33 +404,31 @@
       "label": "document_search",
       "kind": "call",
       "main": true,
+      "fromSide": "bottom",
+      "toSide": "right",
       "points": [
         {
-          "x": 1180,
-          "y": 525
+          "x": 1282.4,
+          "y": 750
         },
         {
-          "x": 1210,
-          "y": 525
+          "x": 1282.4,
+          "y": 768
         },
         {
-          "x": 1210,
-          "y": 700
+          "x": 1168,
+          "y": 768
         },
         {
-          "x": 430,
-          "y": 700
+          "x": 1168,
+          "y": 961.2
         },
         {
-          "x": 430,
-          "y": 845
-        },
-        {
-          "x": 460,
-          "y": 845
+          "x": 1150,
+          "y": 961.2
         }
       ],
-      "d": "M1180 525 L1210 525 L1210 700 L430 700 L430 845 L460 845"
+      "d": "M1282.4 750 L1282.4 768 L1168 768 L1168 961.2 L1150 961.2"
     },
     {
       "id": "tools-sanitizer",
@@ -385,33 +437,27 @@
       "label": "READ có nội dung ngoài",
       "kind": "branch",
       "main": false,
+      "fromSide": "top",
+      "toSide": "bottom",
       "points": [
         {
-          "x": 1180,
-          "y": 525
+          "x": 1427.6,
+          "y": 480
         },
         {
-          "x": 1215,
-          "y": 525
+          "x": 1427.6,
+          "y": 400
         },
         {
-          "x": 1215,
-          "y": 355
+          "x": 1355,
+          "y": 400
         },
         {
-          "x": 825,
-          "y": 355
-        },
-        {
-          "x": 825,
-          "y": 205
-        },
-        {
-          "x": 860,
-          "y": 205
+          "x": 1355,
+          "y": 380
         }
       ],
-      "d": "M1180 525 L1215 525 L1215 355 L825 355 L825 205 L860 205"
+      "d": "M1427.6 480 L1427.6 400 L1355 400 L1355 380"
     },
     {
       "id": "tools-audit",
@@ -420,25 +466,31 @@
       "label": "Wrapper ghi tool event",
       "kind": "data",
       "main": false,
+      "fromSide": "right",
+      "toSide": "top",
       "points": [
         {
-          "x": 1180,
-          "y": 525
+          "x": 1520,
+          "y": 674.4
         },
         {
-          "x": 1220,
-          "y": 525
+          "x": 1536,
+          "y": 674.4
         },
         {
-          "x": 1220,
-          "y": 845
+          "x": 1536,
+          "y": 859
         },
         {
-          "x": 1260,
-          "y": 845
+          "x": 1652.8,
+          "y": 859
+        },
+        {
+          "x": 1652.8,
+          "y": 875
         }
       ],
-      "d": "M1180 525 L1220 525 L1220 845 L1260 845"
+      "d": "M1520 674.4 L1536 674.4 L1536 859 L1652.8 859 L1652.8 875"
     },
     {
       "id": "documents-plugins",
@@ -447,17 +499,27 @@
       "label": "parse → citable chunks",
       "kind": "call",
       "main": true,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 780,
-          "y": 845
+          "x": 1150,
+          "y": 1025
         },
         {
-          "x": 860,
-          "y": 845
+          "x": 1202,
+          "y": 1025
+        },
+        {
+          "x": 1202,
+          "y": 1060
+        },
+        {
+          "x": 1220,
+          "y": 1060
         }
       ],
-      "d": "M780 845 L860 845"
+      "d": "M1150 1025 L1202 1025 L1202 1060 L1220 1060"
     },
     {
       "id": "documents-storage",
@@ -466,33 +528,27 @@
       "label": "Chunks / vectors / catalog",
       "kind": "data",
       "main": true,
+      "fromSide": "left",
+      "toSide": "right",
       "points": [
         {
-          "x": 780,
-          "y": 845
+          "x": 730,
+          "y": 1088.8
         },
         {
-          "x": 805,
-          "y": 845
+          "x": 670,
+          "y": 1088.8
         },
         {
-          "x": 805,
-          "y": 985
+          "x": 670,
+          "y": 1015
         },
         {
-          "x": 35,
-          "y": 985
-        },
-        {
-          "x": 35,
-          "y": 845
-        },
-        {
-          "x": 60,
-          "y": 845
+          "x": 650,
+          "y": 1015
         }
       ],
-      "d": "M780 845 L805 845 L805 985 L35 985 L35 845 L60 845"
+      "d": "M730 1088.8 L670 1088.8 L670 1015 L650 1015"
     },
     {
       "id": "documents-ollama",
@@ -501,33 +557,31 @@
       "label": "Embedding tài liệu & query",
       "kind": "call",
       "main": false,
+      "fromSide": "top",
+      "toSide": "left",
       "points": [
         {
-          "x": 780,
-          "y": 845
+          "x": 940,
+          "y": 880
         },
         {
-          "x": 810,
-          "y": 845
+          "x": 940,
+          "y": 864
         },
         {
-          "x": 810,
-          "y": 350
+          "x": 714,
+          "y": 864
         },
         {
-          "x": 430,
-          "y": 350
+          "x": 714,
+          "y": 167.2
         },
         {
-          "x": 430,
-          "y": 205
-        },
-        {
-          "x": 460,
-          "y": 205
+          "x": 770,
+          "y": 167.2
         }
       ],
-      "d": "M780 845 L810 845 L810 350 L430 350 L430 205 L460 205"
+      "d": "M940 880 L940 864 L714 864 L714 167.2 L770 167.2"
     },
     {
       "id": "documents-sanitizer",
@@ -536,25 +590,27 @@
       "label": "Top-k → safe hits",
       "kind": "call",
       "main": true,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 780,
-          "y": 845
+          "x": 1150,
+          "y": 1088.8
         },
         {
-          "x": 825,
-          "y": 845
+          "x": 1172,
+          "y": 1088.8
         },
         {
-          "x": 825,
-          "y": 205
+          "x": 1172,
+          "y": 214.4
         },
         {
-          "x": 860,
-          "y": 205
+          "x": 1190,
+          "y": 214.4
         }
       ],
-      "d": "M780 845 L825 845 L825 205 L860 205"
+      "d": "M1150 1088.8 L1172 1088.8 L1172 214.4 L1190 214.4"
     },
     {
       "id": "sanitizer-ollama",
@@ -563,33 +619,27 @@
       "label": "Phiên classifier riêng",
       "kind": "call",
       "main": false,
+      "fromSide": "left",
+      "toSide": "right",
       "points": [
         {
-          "x": 1180,
-          "y": 205
+          "x": 1190,
+          "y": 315.6
         },
         {
-          "x": 1220,
-          "y": 205
+          "x": 1130,
+          "y": 315.6
         },
         {
-          "x": 1220,
-          "y": 360
+          "x": 1130,
+          "y": 220
         },
         {
-          "x": 420,
-          "y": 360
-        },
-        {
-          "x": 420,
-          "y": 205
-        },
-        {
-          "x": 460,
-          "y": 205
+          "x": 1110,
+          "y": 220
         }
       ],
-      "d": "M1180 205 L1220 205 L1220 360 L420 360 L420 205 L460 205"
+      "d": "M1190 315.6 L1130 315.6 L1130 220 L1110 220"
     },
     {
       "id": "sanitizer-audit",
@@ -598,25 +648,31 @@
       "label": "Quarantine event",
       "kind": "data",
       "main": false,
+      "fromSide": "right",
+      "toSide": "top",
       "points": [
         {
-          "x": 1180,
-          "y": 205
+          "x": 1520,
+          "y": 265
         },
         {
-          "x": 1240,
-          "y": 205
+          "x": 1536,
+          "y": 265
         },
         {
-          "x": 1240,
-          "y": 845
+          "x": 1536,
+          "y": 859
         },
         {
-          "x": 1260,
-          "y": 845
+          "x": 1767.2,
+          "y": 859
+        },
+        {
+          "x": 1767.2,
+          "y": 875
         }
       ],
-      "d": "M1180 205 L1240 205 L1240 845 L1260 845"
+      "d": "M1520 265 L1536 265 L1536 859 L1767.2 859 L1767.2 875"
     },
     {
       "id": "memory-ollama",
@@ -625,17 +681,27 @@
       "label": "Embedding ký ức",
       "kind": "call",
       "main": false,
+      "fromSide": "right",
+      "toSide": "left",
       "points": [
         {
-          "x": 380,
-          "y": 205
+          "x": 680,
+          "y": 270
         },
         {
-          "x": 460,
-          "y": 205
+          "x": 698,
+          "y": 270
+        },
+        {
+          "x": 698,
+          "y": 272.79999999999995
+        },
+        {
+          "x": 770,
+          "y": 272.79999999999995
         }
       ],
-      "d": "M380 205 L460 205"
+      "d": "M680 270 L698 270 L698 272.79999999999995 L770 272.79999999999995"
     },
     {
       "id": "memory-storage",
@@ -644,33 +710,27 @@
       "label": "Episodes / semantic records",
       "kind": "data",
       "main": false,
+      "fromSide": "bottom",
+      "toSide": "top",
       "points": [
         {
-          "x": 380,
-          "y": 205
+          "x": 530,
+          "y": 390
         },
         {
-          "x": 410,
-          "y": 205
+          "x": 530,
+          "y": 880
         },
         {
-          "x": 410,
-          "y": 700
+          "x": 510,
+          "y": 880
         },
         {
-          "x": 30,
-          "y": 700
-        },
-        {
-          "x": 30,
-          "y": 845
-        },
-        {
-          "x": 60,
-          "y": 845
+          "x": 510,
+          "y": 900
         }
       ],
-      "d": "M380 205 L410 205 L410 700 L30 700 L30 845 L60 845"
+      "d": "M530 390 L530 880 L510 880 L510 900"
     },
     {
       "id": "audit-storage",
@@ -679,33 +739,27 @@
       "label": "Audit events → SQLite",
       "kind": "data",
       "main": false,
+      "fromSide": "bottom",
+      "toSide": "bottom",
       "points": [
         {
-          "x": 1580,
-          "y": 845
+          "x": 1710,
+          "y": 1145
         },
         {
-          "x": 1615,
-          "y": 845
+          "x": 1710,
+          "y": 1186
         },
         {
-          "x": 1615,
-          "y": 995
+          "x": 510,
+          "y": 1186
         },
         {
-          "x": 25,
-          "y": 995
-        },
-        {
-          "x": 25,
-          "y": 845
-        },
-        {
-          "x": 60,
-          "y": 845
+          "x": 510,
+          "y": 1130
         }
       ],
-      "d": "M1580 845 L1615 845 L1615 995 L25 995 L25 845 L60 845"
+      "d": "M1710 1145 L1710 1186 L510 1186 L510 1130"
     },
     {
       "id": "plugins-tools",
@@ -714,33 +768,27 @@
       "label": "Tool capabilities qua host",
       "kind": "construct",
       "main": false,
+      "fromSide": "top",
+      "toSide": "bottom",
       "points": [
         {
-          "x": 1180,
-          "y": 845
+          "x": 1360,
+          "y": 950
         },
         {
-          "x": 1220,
-          "y": 845
+          "x": 1360,
+          "y": 768
         },
         {
-          "x": 1220,
-          "y": 680
+          "x": 1427.6,
+          "y": 768
         },
         {
-          "x": 820,
-          "y": 680
-        },
-        {
-          "x": 820,
-          "y": 525
-        },
-        {
-          "x": 860,
-          "y": 525
+          "x": 1427.6,
+          "y": 750
         }
       ],
-      "d": "M1180 845 L1220 845 L1220 680 L820 680 L820 525 L860 525"
+      "d": "M1360 950 L1360 768 L1427.6 768 L1427.6 750"
     }
   ],
   "interiors": {

@@ -2,11 +2,13 @@ const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const byId=Object.fromEntries(components.map(c=>[c.id,c]));
 const svg=$('#atlas'),overview=$('#overview'),inside=$('#interior');
+const app=$('#atlas-app'),surface=$('#canvas-surface'),drawerMedia=matchMedia('(max-width: 900px)');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const state={view:'overview',component:null,node:null,wire:null,flow:'read',outcome:'normal',step:0};
-let pose={x:0,y:0,w:1640,h:1040},savedOverview=null,cameraFrame=0,pulseFrame=0,playTimer=0,motionEnd=null;
-const frameToLocal=id=>{const b=districtBoxes[id],s=b.w/1800;return {...b,s,h:1040*s};};
-const baseBox=()=>state.view==='detail'?frameToLocal(state.component):{x:0,y:0,w:1640,h:1040};
+const state={view:'overview',component:null,node:null,wire:null,flow:'read',outcome:'normal',step:0,traceActive:false};
+let pose={...atlasSize},savedOverview=null,cameraFrame=0,pulseFrame=0,playTimer=0,motionEnd=null;
+let inspectorOpen=!drawerMedia.matches,expanded=false,fullscreenSerial=0,collapseBeforeExpand=null,inspectorBeforeExpand=null,fullscreenFitPending=false;
+const frameToLocal=id=>{const b=districtBoxes[id],s=b.w/1800;return {...b,y:b.y+(b.h-1040*s)/2,s,h:1040*s};};
+const baseBox=()=>state.view==='detail'?frameToLocal(state.component):atlasSize;
 const show=(el,visible)=>el.toggleAttribute('hidden',!visible);
 function fitted(box,padding=1.03){
   const rect=svg.getBoundingClientRect(),ratio=rect.width/Math.max(1,rect.height);
@@ -16,7 +18,7 @@ function fitted(box,padding=1.03){
 function initialView(){
   const p=fitted(baseBox());
   // A narrow panel starts at a readable neighbourhood scale; Fit still shows all 12.
-  if(state.view==='overview'&&svg.clientWidth<600){const factor=820/p.w;p.x+=p.w*(1-factor)/2;p.y+=p.h*(1-factor)/2;p.w*=factor;p.h*=factor;}
+  if(state.view==='overview'&&svg.clientWidth<600){const factor=900/p.w;p.x+=p.w*(1-factor)/2;p.y+=p.h*(1-factor)/2;p.w*=factor;p.h*=factor;}
   if(state.view==='detail'&&svg.clientWidth<600){const b=frameToLocal(state.component),w=720*b.s,h=w*svg.clientHeight/svg.clientWidth;p.x=b.x+260*b.s-w/2;p.y=b.y+520*b.s-h/2;p.w=w;p.h=h;}
   return p;
 }
@@ -26,7 +28,9 @@ function nodeBox(id){
 }
 function setPose(p){
   pose={...p};svg.setAttribute('viewBox',`${pose.x} ${pose.y} ${pose.w} ${pose.h}`);
-  $('#zoom-value').textContent=Math.round(fitted(baseBox()).w/pose.w*100)+'%';
+  const zoomLevel=fitted(baseBox()).w/pose.w;$('#zoom-value').textContent=Math.round(zoomLevel*100)+'%';
+  show($('#mini-map'),state.view==='overview'&&zoomLevel>1.15);
+  for(const [key,value]of Object.entries({x:pose.x,y:pose.y,width:pose.w,height:pose.h}))$('#mini-camera').setAttribute(key,value);
 }
 function settledLayers(){
   show(overview,state.view!=='detail');show(inside,state.view==='detail');
@@ -109,14 +113,38 @@ function pulse(){
 }
 function updateUI(){
   const detail=state.view==='detail';
+  app.dataset.view=state.view;
   $('#map-title').textContent=detail?districts[state.component].name+' / bên trong.':'Bản đồ hệ thống.';
-  $('#map-subtitle').textContent=detail?'Chọn hàm/class hoặc đường nối để xem chi tiết.':'Chọn một khu để đi vào bên trong.';
+  $('#map-subtitle').textContent=detail?'Chọn hàm/class hoặc đường nối để xem chi tiết.':'CLI → Brain → Tools · Tài liệu và lưu trữ phía dưới.';
   $('#crumb').hidden=!detail;$('#crumb').textContent=detail?districts[state.component].name:'';
   $('.wiring-option').hidden=detail;
   $('#back-view').hidden=!detail;$('#map-context').textContent=detail?'IN bên trái → OUT bên phải · Chọn một đường để theo kết nối':'Kéo để di chuyển · Cuộn để zoom · Bấm một khu để khám phá';
   all('[data-open]').filter(n=>n.closest('.district-directory')).forEach(n=>n.setAttribute('aria-pressed',n.dataset.open===state.component));
   renderDetails();highlight();$('#map-status').textContent=detail?`Đã mở khu ${districts[state.component].name}. ${counts[state.component]} hàm/class.`:'Bản đồ tổng quan, 12 khu chức năng.';
 }
+function setInspector(open,{focus=false}={}){
+  if(open&&drawerMedia.matches)pause();
+  const restoreFocus=!open&&$('#inspector').contains(document.activeElement);
+  inspectorOpen=open;app.classList.toggle('inspector-hidden',!open);$('#inspector').hidden=!open;
+  $('#details-toggle').setAttribute('aria-expanded',String(open));$('#inspector-backdrop').hidden=!open||!drawerMedia.matches;
+  if(open&&focus)$('#close-inspector').focus({preventScroll:true});else if(restoreFocus)$('#details-toggle').focus({preventScroll:true});
+}
+function setFlowCollapsed(collapsed){$('.flow-dock').classList.toggle('collapsed',collapsed);$('#flow-collapse').setAttribute('aria-expanded',String(!collapsed));}
+function setExpanded(value){
+  if(expanded===value)return;expanded=value;app.classList.toggle('is-expanded',value);document.body.classList.toggle('map-expanded',value);
+  fullscreenFitPending=true;
+  $('#fullscreen').setAttribute('aria-pressed',String(value));$('#fullscreen').setAttribute('aria-label',value?'Thoát toàn màn hình':'Phóng to toàn màn hình');$('#fullscreen').querySelector('span').textContent=value?'Thu nhỏ':'Toàn màn hình';
+  if(value){inspectorBeforeExpand=inspectorOpen;setInspector(false);collapseBeforeExpand=$('.flow-dock').classList.contains('collapsed');if(innerHeight<620)setFlowCollapsed(true);}
+  else if(collapseBeforeExpand!==null){setInspector(inspectorBeforeExpand);inspectorBeforeExpand=null;setFlowCollapsed(collapseBeforeExpand);collapseBeforeExpand=null;}
+}
+async function toggleFullscreen(){
+  const serial=++fullscreenSerial;
+  if(expanded){setExpanded(false);if(document.fullscreenElement===app)try{await document.exitFullscreen();}catch{}return;}
+  setExpanded(true);
+  try{if(app.requestFullscreen)await app.requestFullscreen({navigationUI:'hide'});if(serial!==fullscreenSerial&&document.fullscreenElement===app)await document.exitFullscreen();}catch{/* Embedded browsers retain the same full-window map layout. */}
+}
+document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement===app)setExpanded(true);else if(expanded)setExpanded(false);});
+drawerMedia.addEventListener('change',()=>setInspector(expanded?false:!drawerMedia.matches));
 function openDistrict(id,{animate=true,write=true}={}){
   if(!byId[id])return;stopPulse();pause();cancelCamera();
   const same=state.view==='detail'&&state.component===id;
@@ -167,10 +195,14 @@ function pointerEnd(e){
 svg.addEventListener('pointerup',pointerEnd);svg.addEventListener('pointercancel',pointerEnd);
 svg.addEventListener('lostpointercapture',e=>{if(pointers.has(e.pointerId))pointerEnd({...e,pointerId:e.pointerId,type:'pointercancel'});});
 svg.addEventListener('click',e=>{if(performance.now()-lastPointerAction>500)activate(e.target);});
-svg.addEventListener('wheel',e=>{
+// A stable delegated boundary also survives SVG/native-fullscreen layer changes.
+// Wheel events elsewhere retain normal page, form and inspector scrolling.
+function handleMapWheel(e){
+  if(!surface.contains(e.target)||e.target.closest('#help,.camera-controls,#mini-map'))return;
   e.preventDefault();if(e.shiftKey){cancelCamera();setPose(limitPose({...pose,x:pose.x+e.deltaY*pose.w/svg.clientWidth,y:pose.y+e.deltaX*pose.h/svg.clientHeight}));}
   else zoom(Math.exp(Math.max(-180,Math.min(180,e.deltaY))*.003),e.clientX,e.clientY);
-},{passive:false});
+}
+document.addEventListener('wheel',handleMapWheel,{passive:false,capture:true});
 svg.addEventListener('dblclick',e=>{e.preventDefault();if(!e.target.closest('[data-district],[data-node],[data-wire]'))zoom(.65,e.clientX,e.clientY);});
 svg.addEventListener('pointerover',e=>{if(state.view==='overview'&&!pointers.size&&!state.wire){const id=e.target.closest('[data-district]')?.dataset.district;if(id)highlight(id);}});
 svg.addEventListener('pointerleave',()=>highlight());
@@ -179,58 +211,105 @@ svg.addEventListener('keydown',e=>{
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();cancelCamera();setPose(limitPose({...pose,x:pose.x+({'ArrowLeft':-1,'ArrowRight':1}[e.key]||0)*pose.w*.1,y:pose.y+({'ArrowUp':-1,'ArrowDown':1}[e.key]||0)*pose.h*.1}));}
   if(e.key==='+'||e.key==='='){e.preventDefault();zoom(.8);}if(e.key==='-'){e.preventDefault();zoom(1.25);}if(e.key==='Home'){e.preventDefault();cameraTo(fitted(baseBox()));}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){pause();$('#help').hidden=true;$('#help-toggle').setAttribute('aria-expanded','false');if(state.node||state.wire)clearSelection();else if(state.view==='detail')goHome();}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(expanded){e.preventDefault();toggleFullscreen();return;}
+    if(drawerMedia.matches&&inspectorOpen){e.preventDefault();setInspector(false);return;}
+    pause();$('#help').hidden=true;$('#help-toggle').setAttribute('aria-expanded','false');
+    if(state.node||state.wire)clearSelection();else if(state.view==='detail')goHome();
+  }
+  if(e.key.toLowerCase()==='f'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&svg.contains(e.target)){e.preventDefault();toggleFullscreen();}
+});
 document.addEventListener('click',e=>{
   const open=e.target.closest('[data-open]'),node=e.target.closest('[data-inspect-node]'),relation=e.target.closest('[data-relation]'),step=e.target.closest('[data-step]');
-  if(open)openDistrict(open.dataset.open);if(node)inspectNode(node.dataset.inspectNode);if(relation)inspectWire(relation.dataset.relation);if(step){pause();state.step=+step.dataset.step;renderFlow();saveHash();}
+  if(open)openDistrict(open.dataset.open);if(node)inspectNode(node.dataset.inspectNode);if(relation)inspectWire(relation.dataset.relation);if(step){pause();enterTrace();state.step=+step.dataset.step;renderFlow();saveHash();}
 });
-$('#home-view').onclick=()=>goHome();$('#back-view').onclick=()=>goHome();$('.brand').onclick=e=>{e.preventDefault();state.component=null;savedOverview=null;goHome();};
+$('#home-view').onclick=()=>goHome();$('#back-view').onclick=()=>goHome();$('.brand').onclick=e=>{e.preventDefault();pause();state.component=null;state.traceActive=false;savedOverview=null;goHome();renderFlow();};
 $('#clear-selection').onclick=clearSelection;$('#zoom-in').onclick=()=>zoom(.8);$('#zoom-out').onclick=()=>zoom(1.25);$('#fit-view').onclick=()=>cameraTo(fitted(baseBox()));
 $('#all-wires').onchange=e=>svg.classList.toggle('show-all',e.target.checked);
 $('#help-toggle').onclick=()=>{$('#help').hidden=!$('#help').hidden;$('#help-toggle').setAttribute('aria-expanded',String(!$('#help').hidden));};
 $('#theme').onclick=()=>document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark';
-$('#mobile-details').onclick=()=>$('#inspector').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});
-$('#mobile-map').onclick=()=>$('#viewport').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});
+$('#details-toggle').onclick=()=>setInspector(!inspectorOpen,{focus:!inspectorOpen});
+$('#close-inspector').onclick=()=>setInspector(false);$('#inspector-backdrop').onclick=()=>setInspector(false);
+$('#fullscreen').onclick=toggleFullscreen;
+$('#flow-collapse').onclick=()=>setFlowCollapsed(!$('.flow-dock').classList.contains('collapsed'));
+$('#mini-map').onclick=e=>{
+  if(state.view!=='overview')return;cancelCamera();const r=$('#mini-map').getBoundingClientRect(),x=(e.clientX-r.left)/r.width*atlasSize.w,y=(e.clientY-r.top)/r.height*atlasSize.h;
+  setPose(limitPose({...pose,x:x-pose.w/2,y:y-pose.h/2}));
+};
+$('#mini-map').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cameraTo(fitted(baseBox()));}};
 function currentSteps(){return journeySteps(state.flow,state.outcome);}
 function pause(){clearInterval(playTimer);playTimer=0;$('#play').textContent='▶';$('#play').setAttribute('aria-label','Chạy mô phỏng');}
+function enterTrace(){
+  state.traceActive=true;if(state.view==='detail')goHome();state.node=null;state.wire=null;stopPulse();highlight();
+  cameraTo(fitted(atlasSize));
+  if(innerHeight>700)setFlowCollapsed(false);
+}
 function renderFlow(){
   const steps=currentSteps();state.step=Math.max(0,Math.min(steps.length-1,state.step));const s=steps[state.step];
   $('#step-counter').textContent=`${String(state.step+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')}`;
+  $('#compact-step').textContent=`${state.step+1}/${steps.length} · ${districts[s.at].name}`;
   $('#step-title').textContent=districts[s.at].name+' · '+s.title;$('#step-text').textContent=s.text;
-  $('#steps').innerHTML=steps.map((s,i)=>`<button data-step="${i}" aria-label="Bước ${i+1}: ${esc(s.title)}" ${i===state.step?'aria-current="step"':''}></button>`).join('');
-  $('#prev').disabled=state.step===0;$('#next').disabled=state.step===steps.length-1;
-  all('[data-district]').forEach(n=>n.classList.toggle('active-step',n.dataset.district===s.at));
+  $('#steps').innerHTML=steps.map((s,i)=>`<button data-step="${i}" aria-label="Bước ${i+1}: ${esc(s.title)}" ${i===state.step?'aria-current="step"':''}><span>${String(i+1).padStart(2,'0')}</span><span class="step-label">${s.at==='cli'?'CLI':districts[s.at].name}</span></button>`).join('');
+  $('#prev').disabled=state.step===0;$('#next').disabled=state.step===steps.length-1;$('#stop-trace').hidden=!state.traceActive;app.dataset.trace=String(state.traceActive);
+  for(const el of all('[data-district]')){
+    const id=el.dataset.district,visits=steps.flatMap((v,i)=>v.at===id?[i+1]:[]),active=state.traceActive&&id===s.at;
+    el.classList.toggle('active-step',active);el.classList.toggle('trace-visited',state.traceActive&&visits.some(n=>n<=state.step+1));
+    const badge=el.querySelector('[data-badge]');show(badge,state.traceActive&&visits.length>0);
+    const badgeText=active?String(state.step+1).padStart(2,'0'):visits.map(n=>String(n).padStart(2,'0')).join('·');
+    badge.querySelector('text').textContent=badgeText;const width=Math.max(68,badgeText.length*10+22);badge.querySelector('rect').setAttribute('x',-width/2);badge.querySelector('rect').setAttribute('width',width);
+  }
+  const prev=steps[state.step-1]?.at,edge=state.traceActive&&connections.find(e=>(e.from===prev&&e.to===s.at)||(e.to===prev&&e.from===s.at));
+  all('.overview-wire').forEach(el=>el.classList.toggle('trace-active',!!edge&&el.dataset.wire===edge.id));
+  if(state.traceActive&&state.view==='overview'){
+    state.component=s.at;state.node=null;state.wire=null;renderDetails();highlight();
+    all('.district-directory [data-open]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.open===s.at)));
+  }
 }
 function outcomeOptions(){
   const options=[['normal','Bình thường'],...(state.flow==='write'?[['deny','Từ chối']]:['read','search'].includes(state.flow)?[['unsafe','Không an toàn']]:[])];
   if(!options.some(([v])=>v===state.outcome))state.outcome='normal';
   $('#outcome').innerHTML=options.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');$('#outcome').value=state.outcome;
 }
-function advance(delta){pause();state.step+=delta;renderFlow();saveHash();}
+function advance(delta){pause();enterTrace();state.step+=delta;renderFlow();saveHash();}
 $('#prev').onclick=()=>advance(-1);$('#next').onclick=()=>advance(1);
-$('#flow').onchange=e=>{pause();state.flow=e.target.value;state.step=0;outcomeOptions();renderFlow();saveHash();};
-$('#outcome').onchange=e=>{pause();state.outcome=e.target.value;state.step=0;renderFlow();saveHash();};
+$('#flow').onchange=e=>{pause();enterTrace();state.flow=e.target.value;state.step=0;outcomeOptions();renderFlow();saveHash();};
+$('#outcome').onchange=e=>{pause();enterTrace();state.outcome=e.target.value;state.step=0;renderFlow();saveHash();};
 $('#locate-step').onclick=()=>openDistrict(currentSteps()[state.step].at);
+$('#reset-flow').onclick=()=>{pause();enterTrace();state.step=0;renderFlow();saveHash();};
+$('#stop-trace').onclick=()=>{pause();state.traceActive=false;renderFlow();saveHash();};
 $('#play').onclick=()=>{
   if(playTimer){pause();return;}if(reduced.matches){advance(state.step===currentSteps().length-1?-state.step:1);return;}
-  if(state.view==='detail')goHome();if(state.step===currentSteps().length-1)state.step=0;renderFlow();
+  enterTrace();if(state.step===currentSteps().length-1)state.step=0;renderFlow();saveHash();
   $('#play').textContent='Ⅱ';$('#play').setAttribute('aria-label','Tạm dừng mô phỏng');
   playTimer=setInterval(()=>{if(state.step>=currentSteps().length-1){pause();return;}state.step++;renderFlow();saveHash();if(state.step===currentSteps().length-1)pause();},2400);
 };
 function saveHash(push=false){
-  const q=new URLSearchParams();if(state.component)q.set('component',state.component);if(state.view==='detail')q.set('view','detail');if(state.node)q.set('node',state.node);if(state.wire)q.set('wire',state.wire);q.set('flow',state.flow);q.set('outcome',state.outcome);q.set('step',state.step+1);
+  const q=new URLSearchParams();if(state.component)q.set('component',state.component);if(state.view==='detail')q.set('view','detail');if(state.node)q.set('node',state.node);if(state.wire)q.set('wire',state.wire);q.set('flow',state.flow);q.set('outcome',state.outcome);q.set('step',state.step+1);if(state.traceActive)q.set('trace','1');
   const hash='#'+q;if(location.hash!==hash)history[push?'pushState':'replaceState'](null,'',hash);
 }
 function restoreHash(){
   pause();stopPulse();cancelCamera();const q=new URLSearchParams(location.hash.slice(1)),id=q.get('component');
-  state.flow=journeys[q.get('flow')]?q.get('flow'):'read';state.outcome=q.get('outcome')||'normal';state.step=Math.max(0,(Number(q.get('step'))||1)-1);state.component=byId[id]?id:null;state.node=null;state.wire=null;
+  state.flow=journeys[q.get('flow')]?q.get('flow'):'read';state.outcome=q.get('outcome')||'normal';state.step=Math.max(0,(Number(q.get('step'))||1)-1);state.component=byId[id]?id:null;state.node=null;state.wire=null;state.traceActive=q.get('trace')==='1';
   const detail=['detail','open','focus'].includes(q.get('view'))&&state.component;
   if(detail)openDistrict(state.component,{animate:false,write:false});else{state.view='overview';settledLayers();updateUI();setPose(initialView());}
   if(detail&&q.get('node'))inspectNode(q.get('node'),{write:false});if(q.get('wire'))inspectWire(q.get('wire'),{write:false});
   $('#flow').value=state.flow;outcomeOptions();renderFlow();
 }
 window.addEventListener('hashchange',restoreHash);window.addEventListener('popstate',restoreHash);
-new ResizeObserver(()=>{cancelCamera();setPose(initialView());}).observe($('#viewport'));
+let lastSurfaceSize=null;
+new ResizeObserver(()=>{
+  const width=surface.clientWidth,height=surface.clientHeight;if(!width||!height)return;
+  const wasAnimating=!!cameraFrame;cancelCamera();
+  if(fullscreenFitPending||wasAnimating){fullscreenFitPending=false;setPose(state.node?fitted(nodeBox(state.node),1.8):fitted(baseBox()));}
+  else if(!lastSurfaceSize){setPose(state.node?fitted(nodeBox(state.node),1.8):initialView());}
+  else{
+    const b=baseBox(),oldRatio=lastSurfaceSize.width/lastSurfaceSize.height,oldFitWidth=Math.max(b.w*1.03,b.h*1.03*oldRatio),zoomRatio=oldFitWidth/pose.w,next=fitted(b);
+    if(Math.abs(zoomRatio-1)<.02)setPose(next);
+    else{const cx=pose.x+pose.w/2,cy=pose.y+pose.h/2,w=next.w/zoomRatio,h=w*height/width;setPose({...pose,x:cx-w/2,y:cy-h/2,w,h});}
+  }
+  lastSurfaceSize={width,height};
+}).observe(surface);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();stopPulse();cancelCamera();}});
 reduced.addEventListener('change',()=>{if(reduced.matches){pause();stopPulse();cancelCamera();}});
-restoreHash();
+setInspector(inspectorOpen);setFlowCollapsed(innerWidth<600);restoreHash();

@@ -1,6 +1,6 @@
 {
   "name": "declaw-architecture",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "test": "node --test scripts/model.test.mjs scripts/map.test.mjs",
     "test:browser": "node scripts/browser-check.mjs",
     "test:browser:reduced": "node scripts/browser-check.mjs --phone --reduced",
+    "test:layout": "node scripts/browser-check.mjs --phone --reduced --short --fallback --layout-only",
     "dev": "node scripts/serve.mjs"
   }
 }
