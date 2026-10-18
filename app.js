@@ -1,237 +1,236 @@
-const $=s=>document.querySelector(s);
-const all=s=>[...document.querySelectorAll(s)];
-const byId=new Map(components.map(c=>[c.id,c]));
+const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+const byId=Object.fromEntries(components.map(c=>[c.id,c]));
+const svg=$('#atlas'),overview=$('#overview'),inside=$('#interior');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const escapeHtml=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
-let selected='cli',journey='read',outcome='normal',step=0,timer=null;
-let view='overview',node=null,edge=null,traceTimer=null,cameraFrame=0,transitionTimer=null,transitionSerial=0;
-const overviewSVG=$('#overview-scene svg');
-const homeCamera=[0,0,1000,650];
-const stateSteps=()=>journeySteps(journey,outcome);
-const graph=()=>internals[selected];
-const symbolLink=n=>sourceLink(n.file)+'#L'+n.line;
-function saveHash(){
-  const params=new URLSearchParams({component:selected,flow:journey,outcome,step:String(step+1)});
-  if(view!=='overview')params.set('view',view);
-  if(view==='open'&&node)params.set('node',node);
-  if(view==='open'&&edge)params.set('wire',edge);
-  try{history.replaceState(null,'','#'+params);}catch{}
+const state={view:'overview',component:null,node:null,wire:null,flow:'read',outcome:'normal',step:0};
+let pose={x:0,y:0,w:1640,h:1040},savedOverview=null,cameraFrame=0,pulseFrame=0,playTimer=0,motionEnd=null;
+const frameToLocal=id=>{const b=districtBoxes[id],s=b.w/1800;return {...b,s,h:1040*s};};
+const baseBox=()=>state.view==='detail'?frameToLocal(state.component):{x:0,y:0,w:1640,h:1040};
+const show=(el,visible)=>el.toggleAttribute('hidden',!visible);
+function fitted(box,padding=1.03){
+  const rect=svg.getBoundingClientRect(),ratio=rect.width/Math.max(1,rect.height);
+  let w=box.w*padding,h=box.h*padding;if(w/h>ratio)h=w/ratio;else w=h*ratio;
+  return {x:box.x+box.w/2-w/2,y:box.y+box.h/2-h/2,w,h};
 }
-function cameraTo(target,instant=false,targetSVG=overviewSVG){
+function initialView(){
+  const p=fitted(baseBox());
+  // A narrow panel starts at a readable neighbourhood scale; Fit still shows all 12.
+  if(state.view==='overview'&&svg.clientWidth<600){const factor=820/p.w;p.x+=p.w*(1-factor)/2;p.y+=p.h*(1-factor)/2;p.w*=factor;p.h*=factor;}
+  if(state.view==='detail'&&svg.clientWidth<600){const b=frameToLocal(state.component),w=720*b.s,h=w*svg.clientHeight/svg.clientWidth;p.x=b.x+260*b.s-w/2;p.y=b.y+520*b.s-h/2;p.w=w;p.h=h;}
+  return p;
+}
+function nodeBox(id){
+  const g=internals[state.component],i=g.nodes.findIndex(n=>n.id===id),cols=g.nodes.length>6?4:3,b=frameToLocal(state.component);
+  return {x:b.x+(80+(i%cols)*(cols===4?400:600))*b.s,y:b.y+(255+Math.floor(i/cols)*350)*b.s,w:(cols===4?300:360)*b.s,h:240*b.s};
+}
+function setPose(p){
+  pose={...p};svg.setAttribute('viewBox',`${pose.x} ${pose.y} ${pose.w} ${pose.h}`);
+  $('#zoom-value').textContent=Math.round(fitted(baseBox()).w/pose.w*100)+'%';
+}
+function settledLayers(){
+  show(overview,state.view!=='detail');show(inside,state.view==='detail');
+  overview.style.opacity='1';inside.style.opacity='1';
+  overview.style.pointerEvents='';inside.style.pointerEvents='';
+}
+function cancelCamera(){
   cancelAnimationFrame(cameraFrame);cameraFrame=0;
-  const from=targetSVG.getAttribute('viewBox').split(/[ ,]+/).map(Number);
-  if(instant||reduced.matches){targetSVG.setAttribute('viewBox',target.join(' '));return;}
-  const start=performance.now();
-  function frame(now){
-    const t=Math.min(1,Math.max(0,(now-start)/950));
-    const ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-    targetSVG.setAttribute('viewBox',from.map((v,i)=>v+(target[i]-v)*ease).join(' '));
-    cameraFrame=t<1?requestAnimationFrame(frame):0;
-  }
-  cameraFrame=requestAnimationFrame(frame);
+  if(motionEnd){const finish=motionEnd;motionEnd=null;finish();}
 }
-function cameraFor(id){
-  const b=machineBounds[id],h=Math.max(185,(b.bottom-b.y)*1.65),w=h*1000/650;
-  return[(b.x+b.right-w)/2,(b.y+b.bottom-h)/2,w,h];
+function cameraTo(target,{animate=true,transition=false,done}={}){
+  cancelCamera();const from={...pose},start=performance.now();
+  if(!animate||reduced.matches){setPose(target);settledLayers();done?.();return;}
+  if(transition){show(overview,true);show(inside,true);overview.style.pointerEvents='none';inside.style.pointerEvents='none';}
+  motionEnd=()=>{settledLayers();done?.();};
+  const frame=now=>{
+    const t=Math.min(1,(now-start)/800),ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    const p={};for(const key of ['x','y','w','h'])p[key]=from[key]+(target[key]-from[key])*ease;setPose(p);
+    if(transition){inside.style.opacity=String(state.view==='detail'?ease:1-ease);overview.style.opacity=String(state.view==='detail'?1-ease:ease);}
+    if(t<1)cameraFrame=requestAnimationFrame(frame);else{cameraFrame=0;const finish=motionEnd;motionEnd=null;finish?.();}
+  };cameraFrame=requestAnimationFrame(frame);
 }
-function stopTraces(){clearTimeout(traceTimer);traceTimer=null;$('#trace-play').textContent=reduced.matches?'Kết nối tiếp':'▶ Theo kết nối';$('#trace-play').setAttribute('aria-pressed','false');}
-function stop(){
-  clearTimeout(timer);timer=null;
-  $('#play').textContent=reduced.matches?'Xem bước tiếp':'Chạy mô phỏng';$('#play').setAttribute('aria-pressed','false');
-  $('#quick-play').textContent=reduced.matches?'Bước tiếp':'▶ Chạy luồng';$('#quick-play').setAttribute('aria-pressed','false');
+function limitPose(p){
+  const fit=fitted(baseBox()),min=fit.w*.12,max=fit.w*2.5;
+  const w=Math.max(min,Math.min(max,p.w)),h=w*pose.h/pose.w,b=baseBox();
+  return {x:Math.max(b.x-w*.8,Math.min(b.x+b.w-w*.2,p.x)),y:Math.max(b.y-h*.8,Math.min(b.y+b.h-h*.2,p.y)),w,h};
 }
-function cancelTransition(){transitionSerial++;clearTimeout(transitionTimer);}
-function viewControls(){
-  $('#scene-tooltip').hidden=true;
-  $('.iso-plate').dataset.mode=view;
-  $('#back-view').hidden=view==='overview';$('#open-housing').hidden=view!=='focus';$('#trace-play').hidden=view!=='open';
-  $('#crumb-component').hidden=view==='overview';$('#crumb-component').textContent=' / '+byId.get(selected).name;
-  $('#crumb-depth').hidden=view!=='open';$('#crumb-depth').textContent=' / Bên trong';
-  $('#inside-directory').hidden=view!=='open';
-  $('#view-instruction').textContent=view==='overview'?'Bấm khoang máy để tiến lại gần':view==='focus'?'Bấm “Mở lớp vỏ” để khám phá class và hàm':'Bấm chip hoặc đường nối để xem vai trò và quan hệ';
-  $('#scene-hint').textContent=view==='overview'?'KHAY NẠP → QUÉT → KIỂM TRA → KẾT QUẢ':view==='focus'?'MỞ LỚP VỎ ĐỂ XEM BÊN TRONG':'CHIP = CLASS / HÀM · DÂY = QUAN HỆ PHẦN MỀM';
-  if(view==='focus')$('#quick-status').textContent=byId.get(selected).name+' · '+graph().nodes.length+' chip có thể khám phá';
+function worldPoint(x,y,p=pose){const r=svg.getBoundingClientRect();return {x:p.x+(x-r.left)/r.width*p.w,y:p.y+(y-r.top)/r.height*p.h};}
+function zoom(factor,x,y){
+  cancelCamera();const r=svg.getBoundingClientRect(),at=worldPoint(x??r.left+r.width/2,y??r.top+r.height/2);
+  setPose(limitPose({x:at.x-(at.x-pose.x)*factor,y:at.y-(at.y-pose.y)*factor,w:pose.w*factor,h:pose.h*factor}));
 }
-function details(id,updateHash=true){
-  const c=byId.get(id);if(!c)return;selected=id;
-  const contract=`<p class="detail-label">ĐẦU VÀO</p><p class="detail-value">${escapeHtml(c.input)}</p><p class="detail-label">ĐẦU RA</p><p class="detail-value">${escapeHtml(c.output)}</p><p class="detail-label">BÊN TRONG CƠ CẤU</p><ul class="inside-list">${c.inside.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ul><p class="detail-label">RANH GIỚI & NGUYÊN TẮC</p><p class="rule">${escapeHtml(c.rule)}</p><p class="detail-label">ĐỌC MÃ NGUỒN ↗</p><div class="file-links">${c.files.map(f=>`<a href="${sourceLink(f)}" target="_blank" rel="noopener">${escapeHtml(f)} ↗</a>`).join('')}</div>`;
-  $('#details').innerHTML=`<div class="detail-kicker"><span>${view==='open'?'INTERNALS / INSPECT':'COMPARTMENT / INSPECT'}</span><span class="number">${c.n}</span></div><h2>${escapeHtml(c.name)}</h2><p class="object-name">${escapeHtml(c.object)}</p><div class="boundary-badge">${escapeHtml(c.boundary)}</div><p class="summary">${escapeHtml(c.summary)}</p>${view==='open'?'<section id="symbol-inspector" aria-live="polite"></section><details class="module-contract"><summary>Xem hợp đồng toàn module</summary>'+contract+'</details>':`<button class="inspect-cta" data-explore="${id}">Mở bên trong · ${graph().nodes.length} class / hàm ↗</button>`+contract}<p class="detail-label">THÀNH PHẦN LIÊN QUAN</p><div class="related">${c.links.map(s=>`<button data-select="${s}">${escapeHtml(byId.get(s).name)}</button>`).join('')}</div>`;
-  all('[data-select]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.select===id)));
-  all('#overview-scene [data-station]').forEach(g=>g.toggleAttribute('data-selected',g.dataset.station===id));
-  $('#drawing-readout').textContent=`${c.n} / ${c.name}`;
-  if(updateHash)saveHash();
+function sourceAnchor(n){return `<a class="source-link" href="${sourceLink(n.file)}#L${n.line}" target="_blank" rel="noopener">${esc(n.file)}:${n.line} ↗</a>`;}
+const contracts=(input,output)=>`<div class="contract"><span>IN / ĐẦU VÀO</span><p>${esc(input)}</p></div><div class="contract out"><span>OUT / ĐẦU RA</span><p>${esc(output)}</p></div>`;
+const section=(title,content)=>`<section class="detail-section"><h3>${title}</h3>${content}</section>`;
+function icon(id){return `<svg class="detail-icon" viewBox="0 0 145 140" style="--zone:${districts[id].color}" aria-hidden="true">${$(`[data-district="${id}"] .landmark`).outerHTML}</svg>`;}
+function relationButton(e,internal=true){
+  const name=id=>internal?internals[state.component].nodes.find(n=>n.id===id).label:districts[id].name;
+  return `<button data-relation="${e.id}" aria-pressed="${state.wire===e.id}">${esc(name(e.from))} → ${esc(name(e.to))}<small>${esc(e.label)} · ${relationNames[e.kind]}</small></button>`;
 }
-function hideCutaway(){
-  $('#cutaway').hidden=true;$('#cutaway').classList.remove('visible','opened');$('#cutaway').innerHTML='';
-  delete $('#cutaway').dataset.component;
-  $('#overview-scene').classList.remove('behind-cutaway');
-}
-function homeView(instant=false,write=true){
-  cancelTransition();stopTraces();view='overview';node=null;edge=null;hideCutaway();cameraTo(homeCamera,instant);viewControls();details(selected,false);if(write)saveHash();
-}
-function focusComponent(id,instant=false){
-  if(!byId.has(id))return;stop();stopTraces();
-  if(id===selected&&view==='focus'&&!instant){openHousing();return;}
-  if(id===selected&&view==='open'&&!instant)return;
-  cancelTransition();hideCutaway();view='focus';node=null;edge=null;details(id,false);viewControls();cameraTo(cameraFor(id),instant);saveHash();
-  if(!instant){const r=$('.iso-plate').getBoundingClientRect();if(r.top<12||r.bottom>innerHeight-12)$('.iso-plate').scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});}
-}
-function openHousing(instant=false){
-  if(view==='overview')focusComponent(selected,instant);
-  cancelTransition();stop();stopTraces();cameraTo(cameraFor(selected),true);view='open';node=graph().nodes[0].id;edge=null;
-  const art=cutawayArt[selected];
-  const reuse=$('#cutaway').dataset.component===selected&&!$('#cutaway').hidden&&!!$('#cutaway').firstElementChild;
-  if(!reuse)$('#cutaway').innerHTML=art.svg;
-  $('#cutaway').dataset.component=selected;$('#cutaway').hidden=false;
-  $('#cutaway').style.setProperty('--cover-x',art.coverShift[0]+'px');$('#cutaway').style.setProperty('--cover-y',art.coverShift[1]+'px');
-  $('#cutaway').classList.add('visible');$('#overview-scene').classList.add('behind-cutaway');
-  const token=transitionSerial;
-  if(instant||reduced.matches)$('#cutaway').classList.add('opened');
-  else requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token===transitionSerial&&view==='open')$('#cutaway').classList.add('opened');}));
-  viewControls();details(selected,false);renderInside();saveHash();
-}
-function closeHousing(){
-  if(view!=='open')return;cancelTransition();stopTraces();view='focus';node=null;edge=null;
-  $('#cutaway').classList.remove('opened');$('#overview-scene').classList.remove('behind-cutaway');
-  viewControls();details(selected,false);const token=transitionSerial;
-  if(reduced.matches)hideCutaway();else transitionTimer=setTimeout(()=>{if(token===transitionSerial)hideCutaway();},650);
-  saveHash();
-}
-function renderInside(){
-  if(view!=='open')return;const g=graph();const current=g.nodes.find(n=>n.id===node)||g.nodes[0];
-  const active=document.activeElement;
-  const focusKey=active?.closest('#inside-directory')?(active.dataset.nodeSelect?['node-select',active.dataset.nodeSelect]:active.dataset.edgeSelect?['edge-select',active.dataset.edgeSelect]:null):null;
-  const connection=g.edges.find(e=>e.id===edge);
-  $('#inside-count').textContent=g.nodes.length+' CHIP / '+g.edges.length+' KẾT NỐI';
-  $('#node-directory').innerHTML=g.nodes.map((n,i)=>`<button data-node-select="${n.id}" aria-pressed="${String(!edge&&current.id===n.id)}"><span>${String(i+1).padStart(2,'0')}</span><code>${escapeHtml(n.symbol)}</code></button>`).join('');
-  $('#edge-directory').innerHTML=g.edges.map(e=>`<button data-edge-select="${e.id}" aria-pressed="${String(edge===e.id)}"><span class="relation-kind">${relationNames[e.kind]}</span><span>${escapeHtml(g.nodes.find(n=>n.id===e.from).label)} <b>→</b> ${escapeHtml(g.nodes.find(n=>n.id===e.to).label)}</span></button>`).join('');
-  all('#cutaway [data-node]').forEach(el=>{el.toggleAttribute('data-node-active',!connection?el.dataset.node===current.id:[connection.from,connection.to].includes(el.dataset.node));});
-  all('#cutaway [data-edge]').forEach(el=>{el.toggleAttribute('data-edge-active',connection?el.dataset.edge===connection.id:g.edges.some(e=>e.id===el.dataset.edge&&[e.from,e.to].includes(current.id)));el.toggleAttribute('data-signal',!!connection&&el.dataset.edge===connection.id);});
-  const target=$('#symbol-inspector');
-  if(connection){
-    const from=g.nodes.find(n=>n.id===connection.from),to=g.nodes.find(n=>n.id===connection.to);
-    target.innerHTML=`<p class="detail-label">${escapeHtml(relationNames[connection.kind].toUpperCase())}</p><h3 class="symbol-name">${escapeHtml(from.label)} <span>→</span> ${escapeHtml(to.label)}</h3><p class="symbol-role">${escapeHtml(connection.label)}</p><div class="wire-endpoints"><button data-node-select="${from.id}"><span>ĐẦU GỬI</span><code>${escapeHtml(from.symbol)}</code></button><button data-node-select="${to.id}"><span>ĐẦU NHẬN</span><code>${escapeHtml(to.symbol)}</code></button></div><p class="detail-label">ĐỐI CHIẾU HAI ĐẦU NỐI</p><div class="file-links"><a href="${symbolLink(from)}" target="_blank" rel="noopener">${escapeHtml(from.file)}:${from.line} ↗</a><a href="${symbolLink(to)}" target="_blank" rel="noopener">${escapeHtml(to.file)}:${to.line} ↗</a></div>`;
-    $('#quick-status').textContent=relationNames[connection.kind]+' · '+connection.label;
+function renderDetails(){
+  const c=byId[state.component],g=internals[state.component],n=g?.nodes.find(n=>n.id===state.node);
+  const edges=state.view==='detail'?g.edges:connections,e=edges.find(e=>e.id===state.wire);
+  let content='';
+  $('#clear-selection').hidden=!state.node&&!state.wire;
+  if(e){
+    const nodeName=id=>state.view==='detail'?g.nodes.find(n=>n.id===id).label:districts[id].name;
+    const attr=state.view==='detail'?'data-inspect-node':'data-open';
+    content=`<p class="detail-kicker">${state.view==='detail'?districts[state.component].name:'Tổng quan'} / KẾT NỐI</p><h2>${esc(e.label)}</h2><div class="relation-key"><span class="relation-sample ${e.kind}"></span>${relationNames[e.kind]}</div><div class="edge-summary"><button ${attr}="${e.from}">${esc(nodeName(e.from))}</button><span>→</span><button ${attr}="${e.to}">${esc(nodeName(e.to))}</button></div>`;
+    if(state.view==='detail'){
+      const from=g.nodes.find(n=>n.id===e.from),to=g.nodes.find(n=>n.id===e.to);
+      content+=contracts(from.output,to.input)+section('HAI ĐẦU NỐI',`<p class="detail-copy"><b>${esc(from.symbol)}</b><br>${esc(from.role)}</p>${sourceAnchor(from)}<p class="detail-copy"><b>${esc(to.symbol)}</b><br>${esc(to.role)}</p>${sourceAnchor(to)}`);
+    }else content+=`<p class="detail-copy">Mũi tên từ <b>${districts[e.from].name}</b> tới <b>${districts[e.to].name}</b> biểu diễn ${relationNames[e.kind].toLowerCase()}. Kết quả của lời gọi được trả về caller.</p>`+contracts(byId[e.from].output,byId[e.to].input)+`<p class="rule">Đây là quan hệ giữa các trách nhiệm. Bấm hai đầu nối để mở hàm/class và nguồn tương ứng.</p>`;
+  }else if(n){
+    content=`<p class="detail-kicker">${districts[c.id].name} / HÀM & CLASS</p><h2>${esc(n.label)}</h2><p class="detail-subtitle">${esc(n.symbol)}</p><p class="detail-copy">${esc(n.role)}</p>${contracts(n.input,n.output)}${sourceAnchor(n)}${section('CÁC QUAN HỆ CỦA NÚT',`<div class="relation-list">${g.edges.filter(e=>e.from===n.id||e.to===n.id).map(e=>relationButton(e)).join('')}</div>`)}`;
+  }else if(c){
+    content=`${icon(c.id)}<p class="detail-kicker">KHU ${c.n} / ${state.view==='detail'?'BÊN TRONG':'TỔNG QUAN'}</p><h2>${districts[c.id].name}</h2><p class="detail-subtitle">${c.name}</p><span class="boundary-badge">${esc(c.boundary)}</span><p class="detail-copy">${esc(c.summary)}</p>${contracts(c.input,c.output)}${state.view==='overview'?`<button data-open="${c.id}">Đi vào khu ${districts[c.id].name} ↗</button>`:''}${section('CÓ GÌ BÊN TRONG?',`<div class="symbol-list">${g.nodes.map(n=>`<button data-inspect-node="${n.id}" aria-pressed="false"><strong>${esc(n.label)}</strong><span>${esc(n.symbol)}</span></button>`).join('')}</div>`)}${section(state.view==='detail'?'KẾT NỐI BÊN TRONG':'LIÊN KẾT VỚI CÁC KHU',`<div class="relation-list">${(state.view==='detail'?g.edges:connections.filter(e=>e.from===c.id||e.to===c.id)).map(e=>relationButton(e,state.view==='detail')).join('')}</div>`)}${section('RANH GIỚI & HÀNH VI',`<p class="rule">${esc(c.rule)}</p>`)}${section('MÃ NGUỒN',`<div class="source-list">${c.files.map(f=>`<a href="${sourceLink(f)}" target="_blank" rel="noopener">${esc(f)} ↗</a>`).join('')}</div>`)}`;
   }else{
-    target.innerHTML=`<p class="detail-label">CLASS / HÀM THẬT TRONG MÃ NGUỒN</p><h3 class="symbol-name">${escapeHtml(current.symbol)}</h3><p class="symbol-role">${escapeHtml(current.role)}</p><p class="detail-label">NHẬN</p><p class="detail-value">${escapeHtml(current.input)}</p><p class="detail-label">TRẢ VỀ / TẠO RA</p><p class="detail-value">${escapeHtml(current.output)}</p><p class="detail-label">ĐỊNH NGHĨA ↗</p><div class="file-links"><a href="${symbolLink(current)}" target="_blank" rel="noopener">${escapeHtml(current.file)}:${current.line} ↗</a></div><p class="detail-label">CÁC DÂY NỐI VỚI CHIP</p><div class="symbol-connections">${g.edges.filter(e=>[e.from,e.to].includes(current.id)).map(e=>`<button data-edge-select="${e.id}">${escapeHtml(e.label)} →</button>`).join('')||'<p class="detail-value">Không có kết nối được chọn trong góc nhìn này.</p>'}</div>`;
-    $('#quick-status').textContent=current.symbol+' · '+current.role;
+    content=`<p class="detail-kicker">BẢN ĐỒ KIẾN TRÚC / 01</p><h2>Đi vào DeClaw.</h2><p class="overview-intro"><b>Brain</b> điều phối suy luận. <b>Tools</b> thực thi thao tác. <b>Documents</b> xử lý tài liệu. <b>Memory</b> giữ ngữ cảnh và ký ức.</p><p class="overview-intro">Mỗi khu có một hình nhận diện theo chức năng. Bấm vào khu để phóng to và xem các hàm/class nối với nhau.</p><div class="overview-metrics"><div><strong>12</strong><span>KHU CHỨC NĂNG</span></div><div><strong>76</strong><span>THAM CHIẾU NGUỒN</span></div><div><strong>72</strong><span>QUAN HỆ NỘI BỘ</span></div></div><button data-open="agent">Khám phá Brain ↗</button>${section('ĐỌC CÁC ĐƯỜNG NỐI',`<p class="detail-copy">Rê chuột lên một khu để làm rõ các khu liên quan. Bấm đường nối để xem dữ liệu hoặc lời gọi đi qua.</p>${Object.entries(relationNames).map(([k,v])=>`<div class="relation-key"><span class="relation-sample ${k}"></span>${v}</div>`).join('')}`)}${section('THAO TÁC',`<p class="detail-copy">Kéo để di chuyển, cuộn hoặc chụm hai ngón để zoom. Nút ⊡ đưa bản đồ vừa khung. Escape trở lại tổng quan.</p>`)}`;
   }
-  $('#drawing-readout').textContent=byId.get(selected).n+' / '+(connection?'CONNECTION':current.label);
-  if(focusKey)$(`#inside-directory [data-${focusKey[0]}="${focusKey[1]}"]`)?.focus({preventScroll:true});
+  $('#details').innerHTML=content;$('#inspector').scrollTop=0;
 }
-function selectNode(id){if(view!=='open'||!graph().nodes.some(n=>n.id===id))return;stopTraces();node=id;edge=null;renderInside();saveHash();}
-function selectEdge(id,pause=true){if(view!=='open'||!graph().edges.some(e=>e.id===id))return;if(pause)stopTraces();edge=id;node=null;renderInside();saveHash();}
-function traceNext(){
-  if(view!=='open'){stopTraces();return;}
-  const edges=graph().edges,i=edges.findIndex(e=>e.id===edge)+1;
-  if(i>=edges.length){stopTraces();return;}
-  selectEdge(edges[i].id,false);traceTimer=setTimeout(traceNext,2100);
+function highlight(hoverId=null){
+  const edges=state.view==='detail'?internals[state.component].edges:connections;
+  const active=edges.find(e=>e.id===state.wire),node=state.node||hoverId;
+  const rel=active?[active]:node?edges.filter(e=>e.from===node||e.to===node):[];
+  const ids=new Set(rel.flatMap(e=>[e.from,e.to]));
+  const root=state.view==='detail'?inside:overview;root.classList.toggle('has-relation',!!active||!!node);
+  for(const el of root.querySelectorAll('[data-wire]')){el.classList.toggle('highlight',rel.some(e=>e.id===el.dataset.wire));el.classList.toggle('selected',el.dataset.wire===state.wire);}
+  for(const el of root.querySelectorAll('[data-node]')){el.classList.toggle('selected',el.dataset.node===state.node);el.classList.toggle('endpoint',ids.has(el.dataset.node));el.classList.toggle('dimmed',(!!active||!!node)&&!ids.has(el.dataset.node)&&el.dataset.node!==node);}
+  for(const el of overview.querySelectorAll('[data-district]')){el.classList.toggle('selected',el.dataset.district===state.component);el.classList.toggle('neighbor',ids.has(el.dataset.district));}
 }
-$('#trace-play').addEventListener('click',()=>{
-  if(traceTimer){stopTraces();return;}
-  if(reduced.matches){const edges=graph().edges;selectEdge(edges[(edges.findIndex(e=>e.id===edge)+1)%edges.length].id);return;}
-  if(edge===graph().edges.at(-1).id)edge=null;
-  $('#trace-play').textContent='Ⅱ Tạm dừng kết nối';$('#trace-play').setAttribute('aria-pressed','true');traceNext();
+function stopPulse(){cancelAnimationFrame(pulseFrame);pulseFrame=0;all('.wire-pulse').forEach(n=>n.remove());}
+function pulse(){
+  stopPulse();if(reduced.matches||!state.wire||document.hidden)return;
+  const root=state.view==='detail'?inside:overview,path=root.querySelector(`[data-wire="${state.wire}"] .wire-line`);if(!path)return;
+  const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r',state.view==='detail'?'5':'4');dot.classList.add('wire-pulse');root.append(dot);
+  const start=performance.now(),length=path.getTotalLength();
+  const frame=now=>{if(now-start>4800){stopPulse();return;}const p=path.getPointAtLength(((now-start)%2400)/2400*length);dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.y);pulseFrame=requestAnimationFrame(frame);};pulseFrame=requestAnimationFrame(frame);
+}
+function updateUI(){
+  const detail=state.view==='detail';
+  $('#map-title').textContent=detail?districts[state.component].name+' / bên trong.':'Bản đồ hệ thống.';
+  $('#map-subtitle').textContent=detail?'Chọn hàm/class hoặc đường nối để xem chi tiết.':'Chọn một khu để đi vào bên trong.';
+  $('#crumb').hidden=!detail;$('#crumb').textContent=detail?districts[state.component].name:'';
+  $('.wiring-option').hidden=detail;
+  $('#back-view').hidden=!detail;$('#map-context').textContent=detail?'IN bên trái → OUT bên phải · Chọn một đường để theo kết nối':'Kéo để di chuyển · Cuộn để zoom · Bấm một khu để khám phá';
+  all('[data-open]').filter(n=>n.closest('.district-directory')).forEach(n=>n.setAttribute('aria-pressed',n.dataset.open===state.component));
+  renderDetails();highlight();$('#map-status').textContent=detail?`Đã mở khu ${districts[state.component].name}. ${counts[state.component]} hàm/class.`:'Bản đồ tổng quan, 12 khu chức năng.';
+}
+function openDistrict(id,{animate=true,write=true}={}){
+  if(!byId[id])return;stopPulse();pause();cancelCamera();
+  const same=state.view==='detail'&&state.component===id;
+  if(state.view==='overview')savedOverview={...pose};
+  state.view='detail';state.component=id;state.node=null;state.wire=null;
+  inside.innerHTML=interiorArt[id];const b=frameToLocal(id);inside.setAttribute('transform',`translate(${b.x} ${b.y}) scale(${b.s})`);inside.style.setProperty('--zone',districts[id].color);
+  updateUI();cameraTo(initialView(),{animate,transition:!same});svg.focus({preventScroll:true});if(write)saveHash(true);
+}
+function goHome({animate=true,write=true}={}){
+  stopPulse();cancelCamera();const wasDetail=state.view==='detail';state.view='overview';state.node=null;state.wire=null;
+  updateUI();cameraTo(savedOverview||fitted(baseBox()),{animate,transition:wasDetail});svg.focus({preventScroll:true});if(write)saveHash(true);
+}
+function inspectNode(id,{write=true}={}){
+  if(!state.component)return;if(state.view!=='detail')openDistrict(state.component,{write:false});
+  if(!internals[state.component].nodes.some(n=>n.id===id))return;
+  state.node=id;state.wire=null;stopPulse();renderDetails();highlight();
+  cameraTo(fitted(nodeBox(id),1.8));if(write)saveHash();
+}
+function inspectWire(id,{write=true}={}){
+  const edges=state.view==='detail'?internals[state.component].edges:connections;
+  const edge=edges.find(e=>e.id===id);if(!edge)return;state.wire=id;state.node=null;renderDetails();highlight();
+  if(state.view==='detail'){const a=nodeBox(edge.from),b=nodeBox(edge.to),x=Math.min(a.x,b.x),y=Math.min(a.y,b.y);cameraTo(fitted({x,y,w:Math.max(a.x+a.w,b.x+b.w)-x,h:Math.max(a.y+a.h,b.y+b.h)-y},1.2));}
+  pulse();if(write)saveHash();
+}
+function clearSelection(){const hadNode=!!state.node;state.node=null;state.wire=null;stopPulse();renderDetails();highlight();if(hadNode)cameraTo(fitted(baseBox()));saveHash();}
+function activate(target){
+  const district=target.closest('[data-district]'),node=target.closest('[data-node]'),wire=target.closest('[data-wire]');
+  if(district)openDistrict(district.dataset.district);else if(node)inspectNode(node.dataset.node);else if(wire)inspectWire(wire.dataset.wire);else clearSelection();
+}
+// Pointer capture supports mouse, pen and two-finger touch on both exploration levels.
+const pointers=new Map();let pan=null,pinch=null,lastPointerAction=0;
+svg.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;cancelCamera();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});svg.setPointerCapture(e.pointerId);
+  if(pointers.size===1)pan={x:e.clientX,y:e.clientY,pose:{...pose},target:e.target,moved:false};
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={distance:Math.hypot(a.x-b.x,a.y-b.y),anchor:worldPoint((a.x+b.x)/2,(a.y+b.y)/2),pose:{...pose}};if(pan)pan.moved=true;}
 });
-$('#home-view').addEventListener('click',()=>{stop();homeView();});
-$('#back-view').addEventListener('click',()=>view==='open'?closeHousing():homeView());
-$('#open-housing').addEventListener('click',()=>openHousing());
-function changeZoom(factor){
-  const svg=view==='open'?$('#cutaway svg'):overviewSVG;
-  const [x,y,w,h]=svg.getAttribute('viewBox').split(/[ ,]+/).map(Number);
-  const next=Math.max(230,Math.min(1200,w*factor));
-  let cx=x+w/2,cy=y+h/2;
-  if(view==='open'&&node){const chip=$(`#cutaway [data-node="${node}"]`);if(chip){const b=chip.getBBox();cx=b.x+b.width/2;cy=b.y+b.height/2;}}
-  cameraTo([cx-next/2,cy-next*650/1000/2,next,next*650/1000],false,svg);
+svg.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size>=2&&pinch){const [a,b]=[...pointers.values()],factor=pinch.distance/Math.max(10,Math.hypot(a.x-b.x,a.y-b.y)),at=worldPoint((a.x+b.x)/2,(a.y+b.y)/2,pinch.pose);setPose(limitPose({x:pinch.anchor.x-(at.x-pinch.pose.x)*factor,y:pinch.anchor.y-(at.y-pinch.pose.y)*factor,w:pinch.pose.w*factor,h:pinch.pose.h*factor}));}
+  else if(pan){const dx=e.clientX-pan.x,dy=e.clientY-pan.y;if(Math.hypot(dx,dy)>5)pan.moved=true;if(pan.moved){svg.classList.add('dragging');const rect=svg.getBoundingClientRect();setPose(limitPose({...pan.pose,x:pan.pose.x-dx/rect.width*pan.pose.w,y:pan.pose.y-dy/rect.height*pan.pose.h}));}}
+});
+function pointerEnd(e){
+  if(!pointers.has(e.pointerId))return;const selected=pan?.target,click=pan&&!pan.moved&&!pinch&&e.type==='pointerup';pointers.delete(e.pointerId);pinch=null;
+  if(pointers.size===1){const p=[...pointers.values()][0];pan={...p,pose:{...pose},moved:true,target:svg};}
+  else{pan=null;svg.classList.remove('dragging');}
+  lastPointerAction=performance.now();if(click)activate(selected);
 }
-$('#zoom-in').addEventListener('click',()=>changeZoom(.75));
-$('#zoom-out').addEventListener('click',()=>changeZoom(1.33));
-$('#fit-view').addEventListener('click',()=>cameraTo(view==='focus'?cameraFor(selected):homeCamera,false,view==='open'?$('#cutaway svg'):overviewSVG));
-function renderStep(focusStation=true){
-  const steps=stateSteps();step=Math.max(0,Math.min(step,steps.length-1));const s=steps[step];
-  if(focusStation&&view!=='overview')homeView(false,false);
-  $('#steps').style.setProperty('--count',steps.length);
-  $('#steps').innerHTML=steps.map((v,i)=>`<button class="step-button" data-step="${i}"${i===step?' aria-current="step"':''}${i<step?' data-complete=""':''}><span class="step-number">${String(i+1).padStart(2,'0')} / ${byId.get(v.at).n}</span><span>${escapeHtml(v.title)}</span></button>`).join('');
-  $('#step-counter').textContent=`${String(step+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')}`;
-  $('#step-title').textContent=s.title;$('#step-text').textContent=s.text;
-  $('#quick-flow').value=journey;$('#quick-status').textContent=`${step+1} / ${steps.length} · ${s.title}`;
-  $('#quick-next').disabled=step===steps.length-1;$('#prev').disabled=step===0;$('#next').disabled=step===steps.length-1;
-  all('[data-journey]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.journey===journey)));
-  if(focusStation)details(s.at,false);saveHash();
-}
-function renderOutcomes(){
-  const choices=journey==='write'?[['normal','Người dùng cho phép'],['deny','Người dùng từ chối']]:journey==='index'?[['normal','Tệp thay đổi, parse thành công']]:[['normal','Nội dung an toàn'],['unsafe','Nội dung bị chặn / classifier lỗi']];
-  if(!choices.some(([v])=>v===outcome))outcome='normal';
-  $('#outcome').innerHTML=choices.map(([v,n])=>`<option value="${v}"${v===outcome?' selected':''}>${n}</option>`).join('');
-}
-function advance(){if(step>=stateSteps().length-1){stop();return;}step++;renderStep();timer=setTimeout(advance,2600);}
-function chooseJourney(id){stop();stopTraces();homeView(false,false);journey=id;outcome='normal';step=0;renderOutcomes();renderStep();}
-
+svg.addEventListener('pointerup',pointerEnd);svg.addEventListener('pointercancel',pointerEnd);
+svg.addEventListener('lostpointercapture',e=>{if(pointers.has(e.pointerId))pointerEnd({...e,pointerId:e.pointerId,type:'pointercancel'});});
+svg.addEventListener('click',e=>{if(performance.now()-lastPointerAction>500)activate(e.target);});
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();if(e.shiftKey){cancelCamera();setPose(limitPose({...pose,x:pose.x+e.deltaY*pose.w/svg.clientWidth,y:pose.y+e.deltaX*pose.h/svg.clientHeight}));}
+  else zoom(Math.exp(Math.max(-180,Math.min(180,e.deltaY))*.003),e.clientX,e.clientY);
+},{passive:false});
+svg.addEventListener('dblclick',e=>{e.preventDefault();if(!e.target.closest('[data-district],[data-node],[data-wire]'))zoom(.65,e.clientX,e.clientY);});
+svg.addEventListener('pointerover',e=>{if(state.view==='overview'&&!pointers.size&&!state.wire){const id=e.target.closest('[data-district]')?.dataset.district;if(id)highlight(id);}});
+svg.addEventListener('pointerleave',()=>highlight());
+svg.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(e.target);return;}
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();cancelCamera();setPose(limitPose({...pose,x:pose.x+({'ArrowLeft':-1,'ArrowRight':1}[e.key]||0)*pose.w*.1,y:pose.y+({'ArrowUp':-1,'ArrowDown':1}[e.key]||0)*pose.h*.1}));}
+  if(e.key==='+'||e.key==='='){e.preventDefault();zoom(.8);}if(e.key==='-'){e.preventDefault();zoom(1.25);}if(e.key==='Home'){e.preventDefault();cameraTo(fitted(baseBox()));}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){pause();$('#help').hidden=true;$('#help-toggle').setAttribute('aria-expanded','false');if(state.node||state.wire)clearSelection();else if(state.view==='detail')goHome();}});
 document.addEventListener('click',e=>{
-  const chip=e.target.closest('[data-node-select],#cutaway [data-node]');
-  if(chip){selectNode(chip.dataset.nodeSelect||chip.dataset.node);return;}
-  const wire=e.target.closest('[data-edge-select],#cutaway [data-edge]');
-  if(wire){selectEdge(wire.dataset.edgeSelect||wire.dataset.edge);return;}
-  const explore=e.target.closest('[data-explore]');
-  if(explore){
-    const id=explore.dataset.explore;
-    if(view==='focus'&&id===selected){openHousing();return;}
-    focusComponent(id);const token=transitionSerial;
-    if(reduced.matches)openHousing(true);else transitionTimer=setTimeout(()=>{if(token===transitionSerial)openHousing();},980);
-    return;
-  }
-  const pick=e.target.closest('[data-select]');if(pick){focusComponent(pick.dataset.select);return;}
-  const g=e.target.closest('#overview-scene [data-station]');if(g&&byId.has(g.dataset.station)){focusComponent(g.dataset.station);return;}
-  const tab=e.target.closest('[data-journey]');if(tab){chooseJourney(tab.dataset.journey);return;}
-  const next=e.target.closest('[data-step]');if(next){stop();step=Number(next.dataset.step);renderStep();}
+  const open=e.target.closest('[data-open]'),node=e.target.closest('[data-inspect-node]'),relation=e.target.closest('[data-relation]'),step=e.target.closest('[data-step]');
+  if(open)openDistrict(open.dataset.open);if(node)inspectNode(node.dataset.inspectNode);if(relation)inspectWire(relation.dataset.relation);if(step){pause();state.step=+step.dataset.step;renderFlow();saveHash();}
 });
-$('#outcome').addEventListener('change',()=>{stop();outcome=$('#outcome').value;step=0;renderStep();});
-$('#next').addEventListener('click',()=>{stop();step++;renderStep();});
-$('#prev').addEventListener('click',()=>{stop();step--;renderStep();});
-$('#reset').addEventListener('click',()=>{stop();step=0;renderStep();});
-$('#play').addEventListener('click',()=>{
-  if(timer){stop();return;}stopTraces();if(view!=='overview')homeView(false,false);
-  if(reduced.matches){step=step===stateSteps().length-1?0:step+1;renderStep();return;}
-  if(step===stateSteps().length-1){step=0;renderStep();}
-  $('#play').textContent='Tạm dừng';$('#play').setAttribute('aria-pressed','true');timer=setTimeout(advance,2600);
-  $('#quick-play').textContent='Ⅱ Tạm dừng';$('#quick-play').setAttribute('aria-pressed','true');
-});
-$('#quick-flow').addEventListener('change',()=>chooseJourney($('#quick-flow').value));
-$('#quick-play').addEventListener('click',()=>$('#play').click());$('#quick-next').addEventListener('click',()=>$('#next').click());
-$('#theme').addEventListener('click',()=>{document.body.dataset.theme=document.body.dataset.theme==='light'?'dark':'light';$('#theme').setAttribute('aria-pressed',String(document.body.dataset.theme==='dark'));});
-$('.iso-stage').addEventListener('pointermove',e=>{
-  const n=e.target.closest('#cutaway [data-node]'),w=e.target.closest('#cutaway [data-edge]'),g=e.target.closest('#overview-scene [data-station]');
-  let text='';if(n)text=graph().nodes.find(v=>v.id===n.dataset.node)?.symbol||'';
-  else if(w)text=graph().edges.find(v=>v.id===w.dataset.edge)?.label||'';
-  else if(g&&byId.has(g.dataset.station))text=byId.get(g.dataset.station).name+' · Bấm để khám phá';
-  const tip=$('#scene-tooltip'),box=$('.iso-stage').getBoundingClientRect();if(tip.textContent!==text)tip.textContent=text;tip.hidden=!text;
-  tip.style.left=Math.max(8,Math.min(box.width-230,e.clientX-box.left+12))+'px';tip.style.top=Math.max(8,e.clientY-box.top-38)+'px';
-  all('#overview-scene [data-station]').forEach(el=>el.toggleAttribute('data-hover',g&&el.dataset.station===g.dataset.station&&byId.has(g.dataset.station)));
-});
-$('.iso-stage').addEventListener('pointerleave',()=>{$('#scene-tooltip').hidden=true;all('#overview-scene [data-hover]').forEach(g=>g.removeAttribute('data-hover'));});
-$('.brand').addEventListener('click',e=>{e.preventDefault();chooseJourney('read');homeView();window.scrollTo({top:0,behavior:reduced.matches?'instant':'smooth'});});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){stop();stopTraces();if(view==='open')closeHousing();else if(view==='focus')homeView();return;}
-  if(e.target.closest('.stations')&&['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){
-    const buttons=all('.stations button');let i=buttons.indexOf(e.target);if(i<0)return;e.preventDefault();
-    i=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;
-    buttons[i].focus();focusComponent(buttons[i].dataset.select);
-  }
-});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();stopTraces();}});
-new IntersectionObserver(entries=>{if(!entries[0].isIntersecting){stop();stopTraces();}},{threshold:0}).observe($('main'));
-new IntersectionObserver(entries=>{$('.iso-stage').toggleAttribute('data-offscreen',!entries[0].isIntersecting);if(!entries[0].isIntersecting)stopTraces();},{threshold:0}).observe($('.iso-stage'));
-reduced.addEventListener('change',()=>{stop();stopTraces();cameraTo(view==='overview'?homeCamera:cameraFor(selected),true);});
-function restore(){
-  stop();stopTraces();cancelTransition();const p=new URLSearchParams(location.hash.slice(1));
-  const wantedView=p.get('view'),wantedNode=p.get('node'),wantedEdge=p.get('wire'),wantedId=byId.has(p.get('component'))?p.get('component'):'cli';
-  view='overview';hideCutaway();cameraTo(homeCamera,true);
-  journey=journeys[p.get('flow')]?p.get('flow'):'read';outcome=p.get('outcome')||'normal';renderOutcomes();
-  step=Math.max(0,(Number(p.get('step'))||1)-1);renderStep(false);details(wantedId,false);viewControls();
-  if(['focus','open'].includes(wantedView)){
-    focusComponent(wantedId,true);
-    if(wantedView==='open'){openHousing(true);if(graph().nodes.some(n=>n.id===wantedNode))selectNode(wantedNode);if(graph().edges.some(e=>e.id===wantedEdge))selectEdge(wantedEdge);}
-  }
-  saveHash();
+$('#home-view').onclick=()=>goHome();$('#back-view').onclick=()=>goHome();$('.brand').onclick=e=>{e.preventDefault();state.component=null;savedOverview=null;goHome();};
+$('#clear-selection').onclick=clearSelection;$('#zoom-in').onclick=()=>zoom(.8);$('#zoom-out').onclick=()=>zoom(1.25);$('#fit-view').onclick=()=>cameraTo(fitted(baseBox()));
+$('#all-wires').onchange=e=>svg.classList.toggle('show-all',e.target.checked);
+$('#help-toggle').onclick=()=>{$('#help').hidden=!$('#help').hidden;$('#help-toggle').setAttribute('aria-expanded',String(!$('#help').hidden));};
+$('#theme').onclick=()=>document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark';
+$('#mobile-details').onclick=()=>$('#inspector').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});
+$('#mobile-map').onclick=()=>$('#viewport').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});
+function currentSteps(){return journeySteps(state.flow,state.outcome);}
+function pause(){clearInterval(playTimer);playTimer=0;$('#play').textContent='▶';$('#play').setAttribute('aria-label','Chạy mô phỏng');}
+function renderFlow(){
+  const steps=currentSteps();state.step=Math.max(0,Math.min(steps.length-1,state.step));const s=steps[state.step];
+  $('#step-counter').textContent=`${String(state.step+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')}`;
+  $('#step-title').textContent=districts[s.at].name+' · '+s.title;$('#step-text').textContent=s.text;
+  $('#steps').innerHTML=steps.map((s,i)=>`<button data-step="${i}" aria-label="Bước ${i+1}: ${esc(s.title)}" ${i===state.step?'aria-current="step"':''}></button>`).join('');
+  $('#prev').disabled=state.step===0;$('#next').disabled=state.step===steps.length-1;
+  all('[data-district]').forEach(n=>n.classList.toggle('active-step',n.dataset.district===s.at));
 }
-window.addEventListener('hashchange',restore);restore();
+function outcomeOptions(){
+  const options=[['normal','Bình thường'],...(state.flow==='write'?[['deny','Từ chối']]:['read','search'].includes(state.flow)?[['unsafe','Không an toàn']]:[])];
+  if(!options.some(([v])=>v===state.outcome))state.outcome='normal';
+  $('#outcome').innerHTML=options.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');$('#outcome').value=state.outcome;
+}
+function advance(delta){pause();state.step+=delta;renderFlow();saveHash();}
+$('#prev').onclick=()=>advance(-1);$('#next').onclick=()=>advance(1);
+$('#flow').onchange=e=>{pause();state.flow=e.target.value;state.step=0;outcomeOptions();renderFlow();saveHash();};
+$('#outcome').onchange=e=>{pause();state.outcome=e.target.value;state.step=0;renderFlow();saveHash();};
+$('#locate-step').onclick=()=>openDistrict(currentSteps()[state.step].at);
+$('#play').onclick=()=>{
+  if(playTimer){pause();return;}if(reduced.matches){advance(state.step===currentSteps().length-1?-state.step:1);return;}
+  if(state.view==='detail')goHome();if(state.step===currentSteps().length-1)state.step=0;renderFlow();
+  $('#play').textContent='Ⅱ';$('#play').setAttribute('aria-label','Tạm dừng mô phỏng');
+  playTimer=setInterval(()=>{if(state.step>=currentSteps().length-1){pause();return;}state.step++;renderFlow();saveHash();if(state.step===currentSteps().length-1)pause();},2400);
+};
+function saveHash(push=false){
+  const q=new URLSearchParams();if(state.component)q.set('component',state.component);if(state.view==='detail')q.set('view','detail');if(state.node)q.set('node',state.node);if(state.wire)q.set('wire',state.wire);q.set('flow',state.flow);q.set('outcome',state.outcome);q.set('step',state.step+1);
+  const hash='#'+q;if(location.hash!==hash)history[push?'pushState':'replaceState'](null,'',hash);
+}
+function restoreHash(){
+  pause();stopPulse();cancelCamera();const q=new URLSearchParams(location.hash.slice(1)),id=q.get('component');
+  state.flow=journeys[q.get('flow')]?q.get('flow'):'read';state.outcome=q.get('outcome')||'normal';state.step=Math.max(0,(Number(q.get('step'))||1)-1);state.component=byId[id]?id:null;state.node=null;state.wire=null;
+  const detail=['detail','open','focus'].includes(q.get('view'))&&state.component;
+  if(detail)openDistrict(state.component,{animate:false,write:false});else{state.view='overview';settledLayers();updateUI();setPose(initialView());}
+  if(detail&&q.get('node'))inspectNode(q.get('node'),{write:false});if(q.get('wire'))inspectWire(q.get('wire'),{write:false});
+  $('#flow').value=state.flow;outcomeOptions();renderFlow();
+}
+window.addEventListener('hashchange',restoreHash);window.addEventListener('popstate',restoreHash);
+new ResizeObserver(()=>{cancelCamera();setPose(initialView());}).observe($('#viewport'));
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();stopPulse();cancelCamera();}});
+reduced.addEventListener('change',()=>{if(reduced.matches){pause();stopPulse();cancelCamera();}});
+restoreHash();

@@ -1,0 +1,3876 @@
+{
+  "source": {
+    "repo": "https://github.com/NgoHung0704/DeClaw",
+    "commit": "2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed"
+  },
+  "districts": {
+    "memory": {
+      "col": 0,
+      "row": 0,
+      "name": "Memory",
+      "sub": "Bộ nhớ & két khóa",
+      "color": "#997235",
+      "icon": "memory",
+      "verbs": [
+        "Lưu ngữ cảnh",
+        "Tìm ký ức",
+        "Giữ khóa"
+      ]
+    },
+    "ollama": {
+      "col": 1,
+      "row": 0,
+      "name": "Ollama",
+      "sub": "Dịch vụ mô hình riêng",
+      "color": "#8b63b5",
+      "icon": "model",
+      "verbs": [
+        "Chat",
+        "Embedding",
+        "Classifier"
+      ]
+    },
+    "sanitizer": {
+      "col": 2,
+      "row": 0,
+      "name": "Sanitizer",
+      "sub": "Sàng lọc nội dung",
+      "color": "#30846f",
+      "icon": "shield",
+      "verbs": [
+        "Kiểm tra",
+        "Giữ phần an toàn",
+        "Cách ly"
+      ]
+    },
+    "approval": {
+      "col": 3,
+      "row": 0,
+      "name": "Approval",
+      "sub": "Người dùng quyết định",
+      "color": "#b97935",
+      "icon": "gate",
+      "verbs": [
+        "Xem đề xuất",
+        "Cho phép",
+        "Từ chối"
+      ]
+    },
+    "cli": {
+      "col": 0,
+      "row": 1,
+      "name": "CLI / REPL",
+      "sub": "Cửa vào của người dùng",
+      "color": "#527795",
+      "icon": "terminal",
+      "verbs": [
+        "Nhận lệnh",
+        "Lắp phiên",
+        "Hiện kết quả"
+      ]
+    },
+    "agent": {
+      "col": 1,
+      "row": 1,
+      "name": "Brain",
+      "sub": "Agent loop · LangGraph",
+      "color": "#ba6558",
+      "icon": "brain",
+      "verbs": [
+        "Suy luận",
+        "Chọn công cụ",
+        "Quan sát & lặp"
+      ]
+    },
+    "tools": {
+      "col": 2,
+      "row": 1,
+      "name": "Tools",
+      "sub": "Công cụ có schema",
+      "color": "#4d819b",
+      "icon": "tools",
+      "verbs": [
+        "Validate args",
+        "Chọn wrapper",
+        "Thực thi tool"
+      ]
+    },
+    "workspace": {
+      "col": 3,
+      "row": 1,
+      "name": "Workspace",
+      "sub": "Tệp trong phạm vi cho phép",
+      "color": "#8a833e",
+      "icon": "folder",
+      "verbs": [
+        "Đọc / liệt kê",
+        "Ghi / di chuyển",
+        "Kiểm tra path"
+      ]
+    },
+    "storage": {
+      "col": 0,
+      "row": 2,
+      "name": "Storage",
+      "sub": "SQLite + ChromaDB",
+      "color": "#7b77a8",
+      "icon": "database",
+      "verbs": [
+        "Bản ghi SQL",
+        "Vector search",
+        "Text mã hóa"
+      ]
+    },
+    "documents": {
+      "col": 1,
+      "row": 2,
+      "name": "Documents",
+      "sub": "Lập chỉ mục & truy hồi",
+      "color": "#4d8c9a",
+      "icon": "documents",
+      "verbs": [
+        "Parse & chunk",
+        "Index",
+        "Search & cite"
+      ]
+    },
+    "plugins": {
+      "col": 2,
+      "row": 2,
+      "name": "Plugins",
+      "sub": "Host + worker riêng",
+      "color": "#9b7195",
+      "icon": "plug",
+      "verbs": [
+        "Kiểm tra quyền",
+        "NDJSON / stdio",
+        "Parse tài liệu"
+      ]
+    },
+    "audit": {
+      "col": 3,
+      "row": 2,
+      "name": "Audit",
+      "sub": "Nhật ký & HTTP observer",
+      "color": "#7b8072",
+      "icon": "ledger",
+      "verbs": [
+        "Ghi sự kiện",
+        "Quan sát httpx",
+        "Xuất báo cáo"
+      ]
+    }
+  },
+  "connections": [
+    {
+      "id": "cli-agent",
+      "from": "cli",
+      "to": "agent",
+      "label": "Lượt chat → graph",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 380,
+          "y": 525
+        },
+        {
+          "x": 460,
+          "y": 525
+        }
+      ],
+      "d": "M380 525 L460 525"
+    },
+    {
+      "id": "cli-documents",
+      "from": "cli",
+      "to": "documents",
+      "label": "Lắp stack / chạy index",
+      "kind": "construct",
+      "main": false,
+      "points": [
+        {
+          "x": 380,
+          "y": 525
+        },
+        {
+          "x": 435,
+          "y": 525
+        },
+        {
+          "x": 435,
+          "y": 845
+        },
+        {
+          "x": 460,
+          "y": 845
+        }
+      ],
+      "d": "M380 525 L435 525 L435 845 L460 845"
+    },
+    {
+      "id": "cli-plugins",
+      "from": "cli",
+      "to": "plugins",
+      "label": "Load plugin trong phiên",
+      "kind": "construct",
+      "main": false,
+      "points": [
+        {
+          "x": 380,
+          "y": 525
+        },
+        {
+          "x": 410,
+          "y": 525
+        },
+        {
+          "x": 410,
+          "y": 700
+        },
+        {
+          "x": 830,
+          "y": 700
+        },
+        {
+          "x": 830,
+          "y": 845
+        },
+        {
+          "x": 860,
+          "y": 845
+        }
+      ],
+      "d": "M380 525 L410 525 L410 700 L830 700 L830 845 L860 845"
+    },
+    {
+      "id": "agent-ollama",
+      "from": "agent",
+      "to": "ollama",
+      "label": "Messages → AIMessage",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 780,
+          "y": 525
+        },
+        {
+          "x": 815,
+          "y": 525
+        },
+        {
+          "x": 815,
+          "y": 355
+        },
+        {
+          "x": 425,
+          "y": 355
+        },
+        {
+          "x": 425,
+          "y": 205
+        },
+        {
+          "x": 460,
+          "y": 205
+        }
+      ],
+      "d": "M780 525 L815 525 L815 355 L425 355 L425 205 L460 205"
+    },
+    {
+      "id": "agent-tools",
+      "from": "agent",
+      "to": "tools",
+      "label": "Tool calls → observations",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 780,
+          "y": 525
+        },
+        {
+          "x": 860,
+          "y": 525
+        }
+      ],
+      "d": "M780 525 L860 525"
+    },
+    {
+      "id": "tools-approval",
+      "from": "tools",
+      "to": "approval",
+      "label": "Non-READ → xác nhận",
+      "kind": "branch",
+      "main": true,
+      "points": [
+        {
+          "x": 1180,
+          "y": 525
+        },
+        {
+          "x": 1240,
+          "y": 525
+        },
+        {
+          "x": 1240,
+          "y": 205
+        },
+        {
+          "x": 1260,
+          "y": 205
+        }
+      ],
+      "d": "M1180 525 L1240 525 L1240 205 L1260 205"
+    },
+    {
+      "id": "tools-workspace",
+      "from": "tools",
+      "to": "workspace",
+      "label": "Chạy tool filesystem",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 1180,
+          "y": 525
+        },
+        {
+          "x": 1260,
+          "y": 525
+        }
+      ],
+      "d": "M1180 525 L1260 525"
+    },
+    {
+      "id": "tools-documents",
+      "from": "tools",
+      "to": "documents",
+      "label": "document_search",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 1180,
+          "y": 525
+        },
+        {
+          "x": 1210,
+          "y": 525
+        },
+        {
+          "x": 1210,
+          "y": 700
+        },
+        {
+          "x": 430,
+          "y": 700
+        },
+        {
+          "x": 430,
+          "y": 845
+        },
+        {
+          "x": 460,
+          "y": 845
+        }
+      ],
+      "d": "M1180 525 L1210 525 L1210 700 L430 700 L430 845 L460 845"
+    },
+    {
+      "id": "tools-sanitizer",
+      "from": "tools",
+      "to": "sanitizer",
+      "label": "READ có nội dung ngoài",
+      "kind": "branch",
+      "main": false,
+      "points": [
+        {
+          "x": 1180,
+          "y": 525
+        },
+        {
+          "x": 1215,
+          "y": 525
+        },
+        {
+          "x": 1215,
+          "y": 355
+        },
+        {
+          "x": 825,
+          "y": 355
+        },
+        {
+          "x": 825,
+          "y": 205
+        },
+        {
+          "x": 860,
+          "y": 205
+        }
+      ],
+      "d": "M1180 525 L1215 525 L1215 355 L825 355 L825 205 L860 205"
+    },
+    {
+      "id": "tools-audit",
+      "from": "tools",
+      "to": "audit",
+      "label": "Wrapper ghi tool event",
+      "kind": "data",
+      "main": false,
+      "points": [
+        {
+          "x": 1180,
+          "y": 525
+        },
+        {
+          "x": 1220,
+          "y": 525
+        },
+        {
+          "x": 1220,
+          "y": 845
+        },
+        {
+          "x": 1260,
+          "y": 845
+        }
+      ],
+      "d": "M1180 525 L1220 525 L1220 845 L1260 845"
+    },
+    {
+      "id": "documents-plugins",
+      "from": "documents",
+      "to": "plugins",
+      "label": "parse → citable chunks",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 780,
+          "y": 845
+        },
+        {
+          "x": 860,
+          "y": 845
+        }
+      ],
+      "d": "M780 845 L860 845"
+    },
+    {
+      "id": "documents-storage",
+      "from": "documents",
+      "to": "storage",
+      "label": "Chunks / vectors / catalog",
+      "kind": "data",
+      "main": true,
+      "points": [
+        {
+          "x": 780,
+          "y": 845
+        },
+        {
+          "x": 805,
+          "y": 845
+        },
+        {
+          "x": 805,
+          "y": 985
+        },
+        {
+          "x": 35,
+          "y": 985
+        },
+        {
+          "x": 35,
+          "y": 845
+        },
+        {
+          "x": 60,
+          "y": 845
+        }
+      ],
+      "d": "M780 845 L805 845 L805 985 L35 985 L35 845 L60 845"
+    },
+    {
+      "id": "documents-ollama",
+      "from": "documents",
+      "to": "ollama",
+      "label": "Embedding tài liệu & query",
+      "kind": "call",
+      "main": false,
+      "points": [
+        {
+          "x": 780,
+          "y": 845
+        },
+        {
+          "x": 810,
+          "y": 845
+        },
+        {
+          "x": 810,
+          "y": 350
+        },
+        {
+          "x": 430,
+          "y": 350
+        },
+        {
+          "x": 430,
+          "y": 205
+        },
+        {
+          "x": 460,
+          "y": 205
+        }
+      ],
+      "d": "M780 845 L810 845 L810 350 L430 350 L430 205 L460 205"
+    },
+    {
+      "id": "documents-sanitizer",
+      "from": "documents",
+      "to": "sanitizer",
+      "label": "Top-k → safe hits",
+      "kind": "call",
+      "main": true,
+      "points": [
+        {
+          "x": 780,
+          "y": 845
+        },
+        {
+          "x": 825,
+          "y": 845
+        },
+        {
+          "x": 825,
+          "y": 205
+        },
+        {
+          "x": 860,
+          "y": 205
+        }
+      ],
+      "d": "M780 845 L825 845 L825 205 L860 205"
+    },
+    {
+      "id": "sanitizer-ollama",
+      "from": "sanitizer",
+      "to": "ollama",
+      "label": "Phiên classifier riêng",
+      "kind": "call",
+      "main": false,
+      "points": [
+        {
+          "x": 1180,
+          "y": 205
+        },
+        {
+          "x": 1220,
+          "y": 205
+        },
+        {
+          "x": 1220,
+          "y": 360
+        },
+        {
+          "x": 420,
+          "y": 360
+        },
+        {
+          "x": 420,
+          "y": 205
+        },
+        {
+          "x": 460,
+          "y": 205
+        }
+      ],
+      "d": "M1180 205 L1220 205 L1220 360 L420 360 L420 205 L460 205"
+    },
+    {
+      "id": "sanitizer-audit",
+      "from": "sanitizer",
+      "to": "audit",
+      "label": "Quarantine event",
+      "kind": "data",
+      "main": false,
+      "points": [
+        {
+          "x": 1180,
+          "y": 205
+        },
+        {
+          "x": 1240,
+          "y": 205
+        },
+        {
+          "x": 1240,
+          "y": 845
+        },
+        {
+          "x": 1260,
+          "y": 845
+        }
+      ],
+      "d": "M1180 205 L1240 205 L1240 845 L1260 845"
+    },
+    {
+      "id": "memory-ollama",
+      "from": "memory",
+      "to": "ollama",
+      "label": "Embedding ký ức",
+      "kind": "call",
+      "main": false,
+      "points": [
+        {
+          "x": 380,
+          "y": 205
+        },
+        {
+          "x": 460,
+          "y": 205
+        }
+      ],
+      "d": "M380 205 L460 205"
+    },
+    {
+      "id": "memory-storage",
+      "from": "memory",
+      "to": "storage",
+      "label": "Episodes / semantic records",
+      "kind": "data",
+      "main": false,
+      "points": [
+        {
+          "x": 380,
+          "y": 205
+        },
+        {
+          "x": 410,
+          "y": 205
+        },
+        {
+          "x": 410,
+          "y": 700
+        },
+        {
+          "x": 30,
+          "y": 700
+        },
+        {
+          "x": 30,
+          "y": 845
+        },
+        {
+          "x": 60,
+          "y": 845
+        }
+      ],
+      "d": "M380 205 L410 205 L410 700 L30 700 L30 845 L60 845"
+    },
+    {
+      "id": "audit-storage",
+      "from": "audit",
+      "to": "storage",
+      "label": "Audit events → SQLite",
+      "kind": "data",
+      "main": false,
+      "points": [
+        {
+          "x": 1580,
+          "y": 845
+        },
+        {
+          "x": 1615,
+          "y": 845
+        },
+        {
+          "x": 1615,
+          "y": 995
+        },
+        {
+          "x": 25,
+          "y": 995
+        },
+        {
+          "x": 25,
+          "y": 845
+        },
+        {
+          "x": 60,
+          "y": 845
+        }
+      ],
+      "d": "M1580 845 L1615 845 L1615 995 L25 995 L25 845 L60 845"
+    },
+    {
+      "id": "plugins-tools",
+      "from": "plugins",
+      "to": "tools",
+      "label": "Tool capabilities qua host",
+      "kind": "construct",
+      "main": false,
+      "points": [
+        {
+          "x": 1180,
+          "y": 845
+        },
+        {
+          "x": 1220,
+          "y": 845
+        },
+        {
+          "x": 1220,
+          "y": 680
+        },
+        {
+          "x": 820,
+          "y": 680
+        },
+        {
+          "x": 820,
+          "y": 525
+        },
+        {
+          "x": 860,
+          "y": 525
+        }
+      ],
+      "d": "M1180 845 L1220 845 L1220 680 L820 680 L820 525 L860 525"
+    }
+  ],
+  "interiors": {
+    "cli": {
+      "nodes": [
+        {
+          "id": "chat",
+          "symbol": "chat",
+          "label": "chat",
+          "file": "declaw/main.py",
+          "line": 103,
+          "role": "Lệnh Typer lắp cấu hình, sanitizer, audit và confirmation provider.",
+          "input": "CLI options, settings",
+          "output": "Một phiên asyncio",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "session",
+          "symbol": "chat._session",
+          "label": "_session",
+          "file": "declaw/main.py",
+          "line": 216,
+          "role": "Khởi tạo schema và plugin host trong cùng event loop; giải phóng host khi kết thúc.",
+          "input": "Engine, settings, providers",
+          "output": "Registry, graph và phiên REPL",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "registry",
+          "symbol": "default_registry",
+          "label": "default_registry",
+          "file": "declaw/tools/registry.py",
+          "line": 159,
+          "role": "Tạo registry mới và đăng ký các tool filesystem tích hợp.",
+          "input": "Các tool class cụ thể",
+          "output": "ToolRegistry",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "stack",
+          "symbol": "build_document_stack",
+          "label": "document_stack",
+          "file": "declaw/documents/session.py",
+          "line": 41,
+          "role": "Lắp store, catalog, indexer và chunk sanitizer khi doc-intel khả dụng.",
+          "input": "Settings, PluginHost, Sanitizer",
+          "output": "DocumentStack",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "brain",
+          "symbol": "build_brain",
+          "label": "build_brain",
+          "file": "declaw/brain/repl.py",
+          "line": 68,
+          "role": "Lắp model dùng Ollama với đúng danh sách tools rồi biên dịch agent graph.",
+          "input": "Structured tools",
+          "output": "Agent graph",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "repl",
+          "symbol": "run_chat",
+          "label": "run_chat",
+          "file": "declaw/brain/repl.py",
+          "line": 150,
+          "role": "Đọc từng lượt, gọi graph.ainvoke và giữ lịch sử các lượt thành công.",
+          "input": "Graph, read/write callbacks",
+          "output": "Câu trả lời trên console",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "chat-session",
+          "from": "chat",
+          "to": "session",
+          "label": "asyncio.run(_session())",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "session-registry",
+          "from": "session",
+          "to": "registry",
+          "label": "default_registry()",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 375 L1280 375"
+        },
+        {
+          "id": "session-stack",
+          "from": "session",
+          "to": "stack",
+          "label": "Lắp document stack khi plugin đã load",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1070 375 L1070 575 L50 575 L50 725 L80 725"
+        },
+        {
+          "id": "session-brain",
+          "from": "session",
+          "to": "brain",
+          "label": "build_brain(tools)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1075 375 L1075 570 L645 570 L645 725 L680 725"
+        },
+        {
+          "id": "session-repl",
+          "from": "session",
+          "to": "repl",
+          "label": "await run_chat(graph, ...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1080 375 L1080 725 L1280 725"
+        },
+        {
+          "id": "brain-repl",
+          "from": "brain",
+          "to": "repl",
+          "label": "Graph được truyền vào REPL",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "agent": {
+      "nodes": [
+        {
+          "id": "brain",
+          "symbol": "build_brain",
+          "label": "build_brain",
+          "file": "declaw/brain/repl.py",
+          "line": 68,
+          "role": "Điểm lắp model và đồ thị; truyền cùng tool list cho cả hai.",
+          "input": "Tools",
+          "output": "Compiled graph",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "model",
+          "symbol": "build_ollama_model",
+          "label": "ollama_model",
+          "file": "declaw/brain/chat_model.py",
+          "line": 25,
+          "role": "Tạo ChatOllama và bind_tools; trả về callable bất đồng bộ.",
+          "input": "Model settings, tools",
+          "output": "ModelCallable",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "graph",
+          "symbol": "build_agent_graph",
+          "label": "agent_graph",
+          "file": "declaw/brain/loop.py",
+          "line": 76,
+          "role": "Đăng ký agent, ToolNode và các cạnh điều kiện; compile StateGraph.",
+          "input": "ModelCallable, tools",
+          "output": "CompiledStateGraph",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "think",
+          "symbol": "build_agent_graph.think",
+          "label": "think",
+          "file": "declaw/brain/loop.py",
+          "line": 87,
+          "role": "Lấy message history từ state và chờ model; trả reply dưới khóa messages.",
+          "input": "AgentState.messages",
+          "output": "AIMessage",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "call",
+          "symbol": "build_ollama_model.call",
+          "label": "call",
+          "file": "declaw/brain/chat_model.py",
+          "line": 43,
+          "role": "Gọi bound.ainvoke(list(messages)) trên model đã gắn tool schemas.",
+          "input": "Messages",
+          "output": "AIMessage có thể có tool_calls",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "error",
+          "symbol": "tool_error_message",
+          "label": "tool_error",
+          "file": "declaw/brain/loop.py",
+          "line": 59,
+          "role": "Handler cho ToolNode: lỗi dự kiến trở thành observation; lỗi bất ngờ được ghi và che chi tiết.",
+          "input": "Exception",
+          "output": "Tool error observation",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "brain-model",
+          "from": "brain",
+          "to": "model",
+          "label": "Lắp model",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "brain-graph",
+          "from": "brain",
+          "to": "graph",
+          "label": "Lắp graph",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L465 375 L465 520 L1255 520 L1255 375 L1280 375"
+        },
+        {
+          "id": "model-graph",
+          "from": "model",
+          "to": "graph",
+          "label": "Truyền callable model",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 375 L1280 375"
+        },
+        {
+          "id": "graph-think",
+          "from": "graph",
+          "to": "think",
+          "label": "Đăng ký node agent",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 570
+            },
+            {
+              "x": 45,
+              "y": 570
+            },
+            {
+              "x": 45,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1675 375 L1675 570 L45 570 L45 725 L80 725"
+        },
+        {
+          "id": "think-call",
+          "from": "think",
+          "to": "call",
+          "label": "await model(state.messages)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M440 725 L680 725"
+        },
+        {
+          "id": "graph-error",
+          "from": "graph",
+          "to": "error",
+          "label": "ToolNode dùng handle_tool_errors",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1660,
+              "y": 375
+            },
+            {
+              "x": 1660,
+              "y": 585
+            },
+            {
+              "x": 1260,
+              "y": 585
+            },
+            {
+              "x": 1260,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1660 375 L1660 585 L1260 585 L1260 725 L1280 725"
+        },
+        {
+          "id": "call-think",
+          "from": "call",
+          "to": "think",
+          "label": "AIMessage quay lại think",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1065,
+              "y": 725
+            },
+            {
+              "x": 1065,
+              "y": 870
+            },
+            {
+              "x": 55,
+              "y": 870
+            },
+            {
+              "x": 55,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1065 725 L1065 870 L55 870 L55 725 L80 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "tools": {
+      "nodes": [
+        {
+          "id": "default",
+          "symbol": "default_registry",
+          "label": "default_registry",
+          "file": "declaw/tools/registry.py",
+          "line": 159,
+          "role": "Tạo registry và duyệt danh sách tool built-in tường minh.",
+          "input": "Built-in classes",
+          "output": "Registry",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "register",
+          "symbol": "ToolRegistry.register",
+          "label": "register",
+          "file": "declaw/tools/registry.py",
+          "line": 75,
+          "role": "Khởi tạo class tool, chuyển qua register_instance và kiểm tra trùng tên.",
+          "input": "DeclawTool subclass",
+          "output": "Tool instance đã đăng ký",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "wire",
+          "symbol": "ToolRegistry.langchain_tools",
+          "label": "langchain_tools",
+          "file": "declaw/tools/registry.py",
+          "line": 105,
+          "role": "Chọn nhánh READ/non-READ và lắp wrapper. Audit ở ngoài cùng.",
+          "input": "Language, approve, sanitizer, audit",
+          "output": "StructuredTool list",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "confirm",
+          "symbol": "wrap_tool_with_confirmation",
+          "label": "confirmation",
+          "file": "declaw/tools/confirmation.py",
+          "line": 65,
+          "role": "Bọc công cụ non-READ bằng quyết định của người dùng.",
+          "input": "Tool và approve provider",
+          "output": "Gated StructuredTool",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "sanitize",
+          "symbol": "wrap_tool_with_sanitizer",
+          "label": "sanitizer",
+          "file": "declaw/sanitizer/pipeline.py",
+          "line": 47,
+          "role": "Bọc READ có produces_external_content để lọc kết quả trước agent.",
+          "input": "External-content READ tool",
+          "output": "Sanitized StructuredTool",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "audit",
+          "symbol": "wrap_tool_with_audit",
+          "label": "audit",
+          "file": "declaw/audit/tooling.py",
+          "line": 32,
+          "role": "Bọc bên ngoài công cụ đã lắp để ghi kết quả như agent quan sát.",
+          "input": "Inner tool, audit logger",
+          "output": "Audited StructuredTool",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "default-register",
+          "from": "default",
+          "to": "register",
+          "label": "registry.register(tool_cls)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "register-wire",
+          "from": "register",
+          "to": "wire",
+          "label": "Tool instances được đọc khi lắp",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 375 L1280 375"
+        },
+        {
+          "id": "wire-confirm",
+          "from": "wire",
+          "to": "confirm",
+          "label": "Nhánh non-READ",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1670,
+              "y": 375
+            },
+            {
+              "x": 1670,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1670 375 L1670 575 L50 575 L50 725 L80 725"
+        },
+        {
+          "id": "wire-sanitize",
+          "from": "wire",
+          "to": "sanitize",
+          "label": "Nhánh READ có nội dung ngoài",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1675 375 L1675 570 L645 570 L645 725 L680 725"
+        },
+        {
+          "id": "wire-audit",
+          "from": "wire",
+          "to": "audit",
+          "label": "Bọc audit sau cùng",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1680,
+              "y": 375
+            },
+            {
+              "x": 1680,
+              "y": 565
+            },
+            {
+              "x": 1240,
+              "y": 565
+            },
+            {
+              "x": 1240,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1680 375 L1680 565 L1240 565 L1240 725 L1280 725"
+        },
+        {
+          "id": "confirm-audit",
+          "from": "confirm",
+          "to": "audit",
+          "label": "Tool đã được bọc confirmation",
+          "kind": "data",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 460,
+              "y": 725
+            },
+            {
+              "x": 460,
+              "y": 865
+            },
+            {
+              "x": 1260,
+              "y": 865
+            },
+            {
+              "x": 1260,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M440 725 L460 725 L460 865 L1260 865 L1260 725 L1280 725"
+        },
+        {
+          "id": "sanitize-audit",
+          "from": "sanitize",
+          "to": "audit",
+          "label": "Tool đã được sàng lọc",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "approval": {
+      "nodes": [
+        {
+          "id": "wrap",
+          "symbol": "wrap_tool_with_confirmation",
+          "label": "wrap_confirmation",
+          "file": "declaw/tools/confirmation.py",
+          "line": 65,
+          "role": "Dựng StructuredTool dùng gated_coroutine.",
+          "input": "Tool, language, approve",
+          "output": "StructuredTool",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "gate",
+          "symbol": "wrap_tool_with_confirmation.gated_coroutine",
+          "label": "gated_coroutine",
+          "file": "declaw/tools/confirmation.py",
+          "line": 80,
+          "role": "Chờ approve, ghi quyết định và chỉ gọi tool nếu được cho phép.",
+          "input": "Tool kwargs",
+          "output": "Kết quả hoặc denial string",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "provider",
+          "symbol": "make_console_confirmation_provider",
+          "label": "console_provider",
+          "file": "declaw/brain/repl.py",
+          "line": 81,
+          "role": "Tạo provider dùng hỏi đáp console và mô tả thao tác.",
+          "input": "Ask callback, language",
+          "output": "Approve callback",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "approve",
+          "symbol": "make_console_confirmation_provider.approve",
+          "label": "approve",
+          "file": "declaw/brain/repl.py",
+          "line": 111,
+          "role": "Hiện câu hỏi và diễn giải câu trả lời; câu trả lời không rõ dẫn tới từ chối.",
+          "input": "Tool và đối số",
+          "output": "bool",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "run",
+          "symbol": "DeclawTool.run_validated",
+          "label": "run_validated",
+          "file": "declaw/tools/base.py",
+          "line": 87,
+          "role": "Validate đối số theo args_schema rồi gọi _arun của tool.",
+          "input": "Raw args",
+          "output": "Kết quả tool",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "deny",
+          "symbol": "denial_message",
+          "label": "denial_message",
+          "file": "declaw/tools/confirmation.py",
+          "line": 54,
+          "role": "Tạo thông báo từ chối theo ngôn ngữ; không chạy thao tác.",
+          "input": "Tool name, language",
+          "output": "Denial observation",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "wrap-gate",
+          "from": "wrap",
+          "to": "gate",
+          "label": "Dùng closure làm coroutine",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "provider-approve",
+          "from": "provider",
+          "to": "approve",
+          "label": "Trả closure approve",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1665 375 L1665 580 L55 580 L55 725 L80 725"
+        },
+        {
+          "id": "gate-approve",
+          "from": "gate",
+          "to": "approve",
+          "label": "await approve(tool, kwargs)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1070 375 L1070 575 L50 575 L50 725 L80 725"
+        },
+        {
+          "id": "gate-run",
+          "from": "gate",
+          "to": "run",
+          "label": "approved = true",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1075 375 L1075 570 L645 570 L645 725 L680 725"
+        },
+        {
+          "id": "gate-deny",
+          "from": "gate",
+          "to": "deny",
+          "label": "approved = false",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1080 375 L1080 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "workspace": {
+      "nodes": [
+        {
+          "id": "run",
+          "symbol": "DeclawTool.run_validated",
+          "label": "run_validated",
+          "file": "declaw/tools/base.py",
+          "line": 87,
+          "role": "Dùng model_validate trước khi dispatch _arun; chỉ tool được chọn chạy.",
+          "input": "Raw argument dict",
+          "output": "Typed args và tool result",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "read",
+          "symbol": "FilesystemReadTool._arun",
+          "label": "read._arun",
+          "file": "declaw/tools/builtin/filesystem.py",
+          "line": 81,
+          "role": "Resolve đường dẫn trong workspace rồi đọc nội dung tệp.",
+          "input": "FilesystemReadArgs",
+          "output": "Văn bản bên ngoài cần sanitizer",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "write",
+          "symbol": "FilesystemWriteTool._arun",
+          "label": "write._arun",
+          "file": "declaw/tools/builtin/filesystem.py",
+          "line": 142,
+          "role": "Kiểm tra phạm vi và chính sách overwrite trước khi ghi.",
+          "input": "FilesystemWriteArgs",
+          "output": "Write result",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "move",
+          "symbol": "FilesystemMoveTool._arun",
+          "label": "move._arun",
+          "file": "declaw/tools/builtin/filesystem.py",
+          "line": 216,
+          "role": "Resolve nguồn và đích, kiểm tra xung đột rồi di chuyển.",
+          "input": "FilesystemMoveArgs",
+          "output": "Move result",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "list",
+          "symbol": "FilesystemListTool._arun",
+          "label": "list._arun",
+          "file": "declaw/tools/builtin/filesystem.py",
+          "line": 284,
+          "role": "Liệt kê đường dẫn đã được giới hạn trong workspace.",
+          "input": "FilesystemListArgs",
+          "output": "Danh sách tệp",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "path",
+          "symbol": "resolve_in_workspace",
+          "label": "resolve_path",
+          "file": "declaw/tools/builtin/_paths.py",
+          "line": 28,
+          "role": "Resolve đường dẫn và từ chối mọi đường ra ngoài workspace.",
+          "input": "Raw path",
+          "output": "Path hợp lệ hoặc WorkspacePathError",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "run-read",
+          "from": "run",
+          "to": "read",
+          "label": "Dispatch READ",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "run-write",
+          "from": "run",
+          "to": "write",
+          "label": "Dispatch WRITE sau approval",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L465 375 L465 520 L1255 520 L1255 375 L1280 375"
+        },
+        {
+          "id": "run-move",
+          "from": "run",
+          "to": "move",
+          "label": "Dispatch MOVE sau approval",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 470,
+              "y": 375
+            },
+            {
+              "x": 470,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M440 375 L470 375 L470 575 L50 575 L50 725 L80 725"
+        },
+        {
+          "id": "run-list",
+          "from": "run",
+          "to": "list",
+          "label": "Dispatch LIST",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 475,
+              "y": 375
+            },
+            {
+              "x": 475,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M440 375 L475 375 L475 725 L680 725"
+        },
+        {
+          "id": "read-path",
+          "from": "read",
+          "to": "path",
+          "label": "Kiểm tra đường dẫn",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1080 375 L1080 725 L1280 725"
+        },
+        {
+          "id": "write-path",
+          "from": "write",
+          "to": "path",
+          "label": "Kiểm tra đích",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1660,
+              "y": 375
+            },
+            {
+              "x": 1660,
+              "y": 585
+            },
+            {
+              "x": 1260,
+              "y": 585
+            },
+            {
+              "x": 1260,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1660 375 L1660 585 L1260 585 L1260 725 L1280 725"
+        },
+        {
+          "id": "move-path",
+          "from": "move",
+          "to": "path",
+          "label": "Kiểm tra nguồn và đích",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 465,
+              "y": 725
+            },
+            {
+              "x": 465,
+              "y": 870
+            },
+            {
+              "x": 1255,
+              "y": 870
+            },
+            {
+              "x": 1255,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M440 725 L465 725 L465 870 L1255 870 L1255 725 L1280 725"
+        },
+        {
+          "id": "list-path",
+          "from": "list",
+          "to": "path",
+          "label": "Kiểm tra thư mục",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "documents": {
+      "nodes": [
+        {
+          "id": "index",
+          "symbol": "DocumentIndexer._index_one",
+          "label": "_index_one",
+          "file": "declaw/documents/indexer.py",
+          "line": 152,
+          "role": "Kiểm tra hash, parse tệp thay đổi, lưu chunks rồi cập nhật catalog.",
+          "input": "Relative path, IndexReport",
+          "output": "Index result",
+          "x": 80,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "parse",
+          "symbol": "build_document_stack.parse",
+          "label": "parse",
+          "file": "declaw/documents/session.py",
+          "line": 61,
+          "role": "Closure chuyển yêu cầu parse tới doc-intel qua PluginHost.call.",
+          "input": "Path",
+          "output": "Parsed chunks và metadata",
+          "x": 480,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "store",
+          "symbol": "DocumentStore.add_document",
+          "label": "add_document",
+          "file": "declaw/documents/store.py",
+          "line": 72,
+          "role": "Sinh embeddings, encode text và thêm vào collection.",
+          "input": "Document ID, path, chunks",
+          "output": "Chroma records",
+          "x": 880,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "catalog",
+          "symbol": "DocumentCatalog.record",
+          "label": "catalog.record",
+          "file": "declaw/documents/catalog.py",
+          "line": 45,
+          "role": "Ghi metadata và content hash chỉ sau bước lưu thành công.",
+          "input": "Hash, size, mtime, chunk count",
+          "output": "Catalog row",
+          "x": 1280,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "search",
+          "symbol": "search_documents",
+          "label": "search_documents",
+          "file": "declaw/documents/search.py",
+          "line": 98,
+          "role": "Gọi store.search rồi chunk_sanitizer.filter; trả SearchOutcome.",
+          "input": "Query, k",
+          "output": "Safe hits và withheld count",
+          "x": 80,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "query",
+          "symbol": "DocumentStore.search",
+          "label": "store.search",
+          "file": "declaw/documents/store.py",
+          "line": 90,
+          "role": "Embed query, truy hồi nearest chunks và decode payloads.",
+          "input": "Query text",
+          "output": "SearchHit list",
+          "x": 480,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "filter",
+          "symbol": "ChunkSanitizer.filter",
+          "label": "filter",
+          "file": "declaw/documents/search.py",
+          "line": 64,
+          "role": "Cache verdict theo hash và giữ các đoạn được cho phép.",
+          "input": "Top-k hits",
+          "output": "Safe hits và quarantine IDs",
+          "x": 880,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "cite",
+          "symbol": "render_outcome",
+          "label": "render_outcome",
+          "file": "declaw/documents/citations.py",
+          "line": 44,
+          "role": "Định dạng SearchOutcome thành văn bản với structural citations.",
+          "input": "SearchOutcome, language",
+          "output": "Tool output có nguồn",
+          "x": 1280,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "index-parse",
+          "from": "index",
+          "to": "parse",
+          "label": "await self.parse(...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 380,
+              "y": 375
+            },
+            {
+              "x": 480,
+              "y": 375
+            }
+          ],
+          "d": "M380 375 L480 375"
+        },
+        {
+          "id": "index-store",
+          "from": "index",
+          "to": "store",
+          "label": "await store.add_document(...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 380,
+              "y": 375
+            },
+            {
+              "x": 405,
+              "y": 375
+            },
+            {
+              "x": 405,
+              "y": 520
+            },
+            {
+              "x": 855,
+              "y": 520
+            },
+            {
+              "x": 855,
+              "y": 375
+            },
+            {
+              "x": 880,
+              "y": 375
+            }
+          ],
+          "d": "M380 375 L405 375 L405 520 L855 520 L855 375 L880 375"
+        },
+        {
+          "id": "index-catalog",
+          "from": "index",
+          "to": "catalog",
+          "label": "Sau khi lưu thành công",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 380,
+              "y": 375
+            },
+            {
+              "x": 410,
+              "y": 375
+            },
+            {
+              "x": 410,
+              "y": 525
+            },
+            {
+              "x": 1250,
+              "y": 525
+            },
+            {
+              "x": 1250,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M380 375 L410 375 L410 525 L1250 525 L1250 375 L1280 375"
+        },
+        {
+          "id": "search-query",
+          "from": "search",
+          "to": "query",
+          "label": "await store.search(query, k=k)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 380,
+              "y": 725
+            },
+            {
+              "x": 480,
+              "y": 725
+            }
+          ],
+          "d": "M380 725 L480 725"
+        },
+        {
+          "id": "search-filter",
+          "from": "search",
+          "to": "filter",
+          "label": "await chunk_sanitizer.filter(hits)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 380,
+              "y": 725
+            },
+            {
+              "x": 420,
+              "y": 725
+            },
+            {
+              "x": 420,
+              "y": 885
+            },
+            {
+              "x": 840,
+              "y": 885
+            },
+            {
+              "x": 840,
+              "y": 725
+            },
+            {
+              "x": 880,
+              "y": 725
+            }
+          ],
+          "d": "M380 725 L420 725 L420 885 L840 885 L840 725 L880 725"
+        },
+        {
+          "id": "query-filter",
+          "from": "query",
+          "to": "filter",
+          "label": "Truyền hits qua search_documents",
+          "kind": "data",
+          "points": [
+            {
+              "x": 780,
+              "y": 725
+            },
+            {
+              "x": 880,
+              "y": 725
+            }
+          ],
+          "d": "M780 725 L880 725"
+        },
+        {
+          "id": "search-cite",
+          "from": "search",
+          "to": "cite",
+          "label": "SearchOutcome cho lớp render",
+          "kind": "data",
+          "points": [
+            {
+              "x": 380,
+              "y": 725
+            },
+            {
+              "x": 405,
+              "y": 725
+            },
+            {
+              "x": 405,
+              "y": 870
+            },
+            {
+              "x": 1255,
+              "y": 870
+            },
+            {
+              "x": 1255,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M380 725 L405 725 L405 870 L1255 870 L1255 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "sanitizer": {
+      "nodes": [
+        {
+          "id": "filter",
+          "symbol": "ChunkSanitizer.filter",
+          "label": "filter",
+          "file": "declaw/documents/search.py",
+          "line": 64,
+          "role": "Khử trùng lặp theo hash, đọc cache và gọi Sanitizer cho các đoạn chưa được xét.",
+          "input": "Retrieved hits",
+          "output": "Safe và withheld hits",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "check",
+          "symbol": "Sanitizer.check",
+          "label": "check",
+          "file": "declaw/sanitizer/sanitizer.py",
+          "line": 66,
+          "role": "Gọi classifier; chỉ giữ safe_content khi verdict an toàn.",
+          "input": "Content, source",
+          "output": "SanitizationResult",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "build",
+          "symbol": "build_ollama_classifier",
+          "label": "classifier_factory",
+          "file": "declaw/sanitizer/classifier.py",
+          "line": 47,
+          "role": "Tạo callable classify dùng một phiên model tách khỏi agent.",
+          "input": "Ollama settings",
+          "output": "Classifier callable",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "classify",
+          "symbol": "build_ollama_classifier.classify",
+          "label": "classify",
+          "file": "declaw/sanitizer/classifier.py",
+          "line": 68,
+          "role": "Gọi Ollama, ép verdict và trả UNSAFE nếu phân loại lỗi.",
+          "input": "Untrusted content",
+          "output": "SanitizerVerdict",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "quarantine",
+          "symbol": "QuarantineStore.add",
+          "label": "quarantine.add",
+          "file": "declaw/sanitizer/quarantine.py",
+          "line": 145,
+          "role": "Lưu bản ghi bị chặn và phát event qua audit sink.",
+          "input": "Content, source, verdict",
+          "output": "Quarantine ID",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "result",
+          "symbol": "SanitizationResult",
+          "label": "result",
+          "file": "declaw/sanitizer/sanitizer.py",
+          "line": 33,
+          "role": "Kết quả có safe_content hoặc quarantine_id, không đồng thời cả hai đường.",
+          "input": "Verdict và payload an toàn",
+          "output": "Giá trị cho caller",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "filter-check",
+          "from": "filter",
+          "to": "check",
+          "label": "await sanitizer.check(...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "build-classify",
+          "from": "build",
+          "to": "classify",
+          "label": "Trả closure classify",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1665 375 L1665 580 L55 580 L55 725 L80 725"
+        },
+        {
+          "id": "check-classify",
+          "from": "check",
+          "to": "classify",
+          "label": "await self._classify(content)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 375
+            },
+            {
+              "x": 1070,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 575
+            },
+            {
+              "x": 50,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1070 375 L1070 575 L50 575 L50 725 L80 725"
+        },
+        {
+          "id": "check-quarantine",
+          "from": "check",
+          "to": "quarantine",
+          "label": "UNSAFE → add(...)",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 375
+            },
+            {
+              "x": 1075,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 570
+            },
+            {
+              "x": 645,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1075 375 L1075 570 L645 570 L645 725 L680 725"
+        },
+        {
+          "id": "check-result",
+          "from": "check",
+          "to": "result",
+          "label": "Dựng kết quả SAFE / UNSAFE",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 375
+            },
+            {
+              "x": 1080,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 375 L1080 375 L1080 725 L1280 725"
+        },
+        {
+          "id": "quarantine-result",
+          "from": "quarantine",
+          "to": "result",
+          "label": "Quarantine ID thay văn bản",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "storage": {
+      "nodes": [
+        {
+          "id": "engine",
+          "symbol": "get_sessionmaker",
+          "label": "get_sessionmaker",
+          "file": "declaw/db/engine.py",
+          "line": 61,
+          "role": "Cung cấp sessionmaker dùng SQLite engine dùng chung.",
+          "input": "Engine singleton",
+          "output": "Async session factory",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "catalog",
+          "symbol": "DocumentCatalog.record",
+          "label": "catalog.record",
+          "file": "declaw/documents/catalog.py",
+          "line": 45,
+          "role": "Mở session, ghi trạng thái tệp và commit bản ghi.",
+          "input": "Document metadata",
+          "output": "SQLite catalog record",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "store",
+          "symbol": "DocumentStore.add_document",
+          "label": "add_document",
+          "file": "declaw/documents/store.py",
+          "line": 72,
+          "role": "Chuẩn bị vectors, text payloads và metadata cho Chroma.",
+          "input": "Chunks",
+          "output": "Collection records",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "encode",
+          "symbol": "DocumentStore._encode",
+          "label": "_encode",
+          "file": "declaw/documents/store.py",
+          "line": 133,
+          "role": "Encode text bằng Fernet khi store được lắp với khóa.",
+          "input": "Plaintext chunk",
+          "output": "Stored text",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "encrypt",
+          "symbol": "encrypt_text",
+          "label": "encrypt_text",
+          "file": "declaw/memory/crypto.py",
+          "line": 40,
+          "role": "Mã hóa UTF-8 thành Fernet token. Không mã hóa vector.",
+          "input": "Fernet key, text",
+          "output": "Ciphertext token",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "search",
+          "symbol": "DocumentStore.search",
+          "label": "store.search",
+          "file": "declaw/documents/store.py",
+          "line": 90,
+          "role": "Truy hồi vectors, decode chunks và giữ metadata cho trích dẫn.",
+          "input": "Query",
+          "output": "SearchHit list",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "engine-catalog",
+          "from": "engine",
+          "to": "catalog",
+          "label": "Session factory được inject vào catalog",
+          "kind": "data",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "store-encode",
+          "from": "store",
+          "to": "encode",
+          "label": "Encode từng chunk",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1665 375 L1665 580 L55 580 L55 725 L80 725"
+        },
+        {
+          "id": "encode-encrypt",
+          "from": "encode",
+          "to": "encrypt",
+          "label": "Mã hóa khi có Fernet key",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M440 725 L680 725"
+        },
+        {
+          "id": "store-search",
+          "from": "store",
+          "to": "search",
+          "label": "Đọc cùng collection",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 375
+            },
+            {
+              "x": 1675,
+              "y": 570
+            },
+            {
+              "x": 1245,
+              "y": 570
+            },
+            {
+              "x": 1245,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1675 375 L1675 570 L1245 570 L1245 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "ollama": {
+      "nodes": [
+        {
+          "id": "chat",
+          "symbol": "build_ollama_model",
+          "label": "chat_factory",
+          "file": "declaw/brain/chat_model.py",
+          "line": 25,
+          "role": "Lắp ChatOllama với tools; cấu hình model và base URL.",
+          "input": "Settings, tools",
+          "output": "ModelCallable",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "call",
+          "symbol": "build_ollama_model.call",
+          "label": "chat.call",
+          "file": "declaw/brain/chat_model.py",
+          "line": 43,
+          "role": "Gửi messages tới bound.ainvoke.",
+          "input": "Message history",
+          "output": "AIMessage",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "embedder",
+          "symbol": "build_ollama_embedder",
+          "label": "embed_factory",
+          "file": "declaw/memory/embeddings.py",
+          "line": 21,
+          "role": "Dựng callable embedding qua OllamaEmbeddings.",
+          "input": "Embedding model, base URL",
+          "output": "EmbedCallable",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "embed",
+          "symbol": "build_ollama_embedder.embed",
+          "label": "embed",
+          "file": "declaw/memory/embeddings.py",
+          "line": 35,
+          "role": "Chờ aembed_documents(texts).",
+          "input": "Text list",
+          "output": "Vector list",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "classifier",
+          "symbol": "build_ollama_classifier",
+          "label": "classify_factory",
+          "file": "declaw/sanitizer/classifier.py",
+          "line": 47,
+          "role": "Tạo adapter classifier độc lập với context hội thoại.",
+          "input": "Classifier settings",
+          "output": "Classify callable",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "classify",
+          "symbol": "build_ollama_classifier.classify",
+          "label": "classify",
+          "file": "declaw/sanitizer/classifier.py",
+          "line": 68,
+          "role": "Gọi model để phân loại; fail closed khi lỗi.",
+          "input": "Untrusted text",
+          "output": "Verdict",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "chat-call",
+          "from": "chat",
+          "to": "call",
+          "label": "Trả chat callable",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "embedder-embed",
+          "from": "embedder",
+          "to": "embed",
+          "label": "Trả embedding callable",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1640,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 375
+            },
+            {
+              "x": 1665,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 580
+            },
+            {
+              "x": 55,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1640 375 L1665 375 L1665 580 L55 580 L55 725 L80 725"
+        },
+        {
+          "id": "classifier-classify",
+          "from": "classifier",
+          "to": "classify",
+          "label": "Trả classifier callable",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "plugins": {
+      "nodes": [
+        {
+          "id": "host",
+          "symbol": "PluginHost.call",
+          "label": "host.call",
+          "file": "declaw/plugin_host/host.py",
+          "line": 154,
+          "role": "Tìm plugin/capability, kiểm tra từng quyền và giới hạn timeout.",
+          "input": "Plugin, capability, args",
+          "output": "Capability result",
+          "x": 80,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "permission",
+          "symbol": "PermissionEnforcer.require",
+          "label": "require",
+          "file": "declaw/plugin_host/permissions.py",
+          "line": 145,
+          "role": "Yêu cầu quyền được khai báo; có thể chặn trước khi gọi worker.",
+          "input": "Permission name",
+          "output": "Cho phép hoặc lỗi quyền",
+          "x": 480,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "supervisor",
+          "symbol": "PluginSupervisor.call",
+          "label": "supervisor.call",
+          "file": "declaw/plugin_host/supervisor.py",
+          "line": 100,
+          "role": "Điều phối request qua process và chính sách giám sát worker.",
+          "input": "Method, params, timeout",
+          "output": "Response result",
+          "x": 880,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "request",
+          "symbol": "PluginProcess.request",
+          "label": "process.request",
+          "file": "declaw/plugin_host/process.py",
+          "line": 114,
+          "role": "Ghi request frame vào stdin, đợi response có request ID khớp và trả response.result.",
+          "input": "Method, params",
+          "output": "Capability result hoặc typed error",
+          "x": 1280,
+          "y": 255,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "encode",
+          "symbol": "encode_frame",
+          "label": "encode_frame",
+          "file": "declaw/plugin_host/ipc.py",
+          "line": 20,
+          "role": "Serialize model thành một dòng JSON có newline.",
+          "input": "RequestFrame",
+          "output": "NDJSON bytes",
+          "x": 80,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "decode",
+          "symbol": "decode_response",
+          "label": "decode_response",
+          "file": "declaw/plugin_host/ipc.py",
+          "line": 30,
+          "role": "Parse và validate response line nhận từ worker.",
+          "input": "Stdout bytes",
+          "output": "Typed ResponseFrame",
+          "x": 480,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "parse",
+          "symbol": "DocIntelPlugin.parse",
+          "label": "worker.parse",
+          "file": "plugins/builtin/doc-intel/main.py",
+          "line": 62,
+          "role": "Trong worker: chọn parser theo định dạng, chia text thành chunks và giới hạn kích thước kết quả. Capability này không expose trực tiếp cho model.",
+          "input": "ParseArgs với absolute path đã kiểm tra",
+          "output": "doc_type, page_count và citable chunks",
+          "x": 880,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        },
+        {
+          "id": "chunk",
+          "symbol": "chunk_blocks",
+          "label": "chunk_blocks",
+          "file": "plugins/builtin/doc-intel/chunker.py",
+          "line": 58,
+          "role": "Gom các text block thành chunks với giới hạn token và giữ thông tin nguồn.",
+          "input": "Parsed text blocks",
+          "output": "Chunks có ordinal, page, sheet hoặc heading",
+          "x": 1280,
+          "y": 605,
+          "w": 300,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "host-permission",
+          "from": "host",
+          "to": "permission",
+          "label": "await enforcer.require(permission)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 380,
+              "y": 375
+            },
+            {
+              "x": 480,
+              "y": 375
+            }
+          ],
+          "d": "M380 375 L480 375"
+        },
+        {
+          "id": "host-supervisor",
+          "from": "host",
+          "to": "supervisor",
+          "label": "Sau khi được cấp quyền",
+          "kind": "branch",
+          "points": [
+            {
+              "x": 380,
+              "y": 375
+            },
+            {
+              "x": 405,
+              "y": 375
+            },
+            {
+              "x": 405,
+              "y": 520
+            },
+            {
+              "x": 855,
+              "y": 520
+            },
+            {
+              "x": 855,
+              "y": 375
+            },
+            {
+              "x": 880,
+              "y": 375
+            }
+          ],
+          "d": "M380 375 L405 375 L405 520 L855 520 L855 375 L880 375"
+        },
+        {
+          "id": "supervisor-request",
+          "from": "supervisor",
+          "to": "request",
+          "label": "Gọi process.request(...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1180,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1180 375 L1280 375"
+        },
+        {
+          "id": "request-encode",
+          "from": "request",
+          "to": "encode",
+          "label": "Mã hóa request",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1580,
+              "y": 375
+            },
+            {
+              "x": 1615,
+              "y": 375
+            },
+            {
+              "x": 1615,
+              "y": 570
+            },
+            {
+              "x": 45,
+              "y": 570
+            },
+            {
+              "x": 45,
+              "y": 725
+            },
+            {
+              "x": 80,
+              "y": 725
+            }
+          ],
+          "d": "M1580 375 L1615 375 L1615 570 L45 570 L45 725 L80 725"
+        },
+        {
+          "id": "request-decode",
+          "from": "request",
+          "to": "decode",
+          "label": "Qua _read_matching(...)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1580,
+              "y": 375
+            },
+            {
+              "x": 1620,
+              "y": 375
+            },
+            {
+              "x": 1620,
+              "y": 565
+            },
+            {
+              "x": 440,
+              "y": 565
+            },
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 480,
+              "y": 725
+            }
+          ],
+          "d": "M1580 375 L1620 375 L1620 565 L440 565 L440 725 L480 725"
+        },
+        {
+          "id": "decode-host",
+          "from": "decode",
+          "to": "host",
+          "label": "Result đi ngược chuỗi await",
+          "kind": "data",
+          "points": [
+            {
+              "x": 780,
+              "y": 725
+            },
+            {
+              "x": 800,
+              "y": 725
+            },
+            {
+              "x": 800,
+              "y": 515
+            },
+            {
+              "x": 60,
+              "y": 515
+            },
+            {
+              "x": 60,
+              "y": 375
+            },
+            {
+              "x": 80,
+              "y": 375
+            }
+          ],
+          "d": "M780 725 L800 725 L800 515 L60 515 L60 375 L80 375"
+        },
+        {
+          "id": "encode-parse",
+          "from": "encode",
+          "to": "parse",
+          "label": "NDJSON qua stdio, SDK dispatch capability",
+          "kind": "data",
+          "points": [
+            {
+              "x": 380,
+              "y": 725
+            },
+            {
+              "x": 405,
+              "y": 725
+            },
+            {
+              "x": 405,
+              "y": 870
+            },
+            {
+              "x": 855,
+              "y": 870
+            },
+            {
+              "x": 855,
+              "y": 725
+            },
+            {
+              "x": 880,
+              "y": 725
+            }
+          ],
+          "d": "M380 725 L405 725 L405 870 L855 870 L855 725 L880 725"
+        },
+        {
+          "id": "parse-chunk",
+          "from": "parse",
+          "to": "chunk",
+          "label": "chunk_blocks(parsed.blocks)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1180,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1180 725 L1280 725"
+        },
+        {
+          "id": "parse-decode",
+          "from": "parse",
+          "to": "decode",
+          "label": "Kết quả qua SDK / stdout response",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1180,
+              "y": 725
+            },
+            {
+              "x": 1215,
+              "y": 725
+            },
+            {
+              "x": 1215,
+              "y": 880
+            },
+            {
+              "x": 445,
+              "y": 880
+            },
+            {
+              "x": 445,
+              "y": 725
+            },
+            {
+              "x": 480,
+              "y": 725
+            }
+          ],
+          "d": "M1180 725 L1215 725 L1215 880 L445 880 L445 725 L480 725"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "memory": {
+      "nodes": [
+        {
+          "id": "add",
+          "symbol": "SemanticMemory.add",
+          "label": "memory.add",
+          "file": "declaw/memory/semantic.py",
+          "line": 67,
+          "role": "Tạo ID, embed text, mã hóa payload rồi thêm vào collection.",
+          "input": "Text, metadata",
+          "output": "Memory ID",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "embed",
+          "symbol": "build_ollama_embedder.embed",
+          "label": "embed",
+          "file": "declaw/memory/embeddings.py",
+          "line": 35,
+          "role": "Chuyển văn bản sang vectors để tìm kiếm tương đồng.",
+          "input": "Text list",
+          "output": "Embedding vectors",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "encrypt",
+          "symbol": "encrypt_text",
+          "label": "encrypt_text",
+          "file": "declaw/memory/crypto.py",
+          "line": 40,
+          "role": "Mã hóa text với khóa Fernet đã được inject.",
+          "input": "Fernet, text",
+          "output": "Encrypted text",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "search",
+          "symbol": "SemanticMemory.search",
+          "label": "memory.search",
+          "file": "declaw/memory/semantic.py",
+          "line": 84,
+          "role": "Embed query, tìm nearest records và reveal text.",
+          "input": "Query, k",
+          "output": "MemoryHit list",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "key",
+          "symbol": "get_or_create_fernet",
+          "label": "get_fernet",
+          "file": "declaw/memory/crypto.py",
+          "line": 26,
+          "role": "Lấy hoặc sinh khóa memory-fernet-key qua credential store.",
+          "input": "SecretStore",
+          "output": "Fernet instance",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "vault",
+          "symbol": "default_credential_store",
+          "label": "credential_store",
+          "file": "declaw/credentials/store.py",
+          "line": 95,
+          "role": "Dùng OS keyring hoặc encrypted-file fallback khi không có backend phù hợp.",
+          "input": "Secrets path tùy chọn",
+          "output": "SecretStore",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "add-embed",
+          "from": "add",
+          "to": "embed",
+          "label": "await self._embed([text])",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "add-encrypt",
+          "from": "add",
+          "to": "encrypt",
+          "label": "Mã hóa text trước collection.add",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 375
+            },
+            {
+              "x": 465,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 520
+            },
+            {
+              "x": 1255,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L465 375 L465 520 L1255 520 L1255 375 L1280 375"
+        },
+        {
+          "id": "search-embed",
+          "from": "search",
+          "to": "embed",
+          "label": "Embed query để tìm kiếm",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 470,
+              "y": 725
+            },
+            {
+              "x": 470,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 725 L470 725 L470 375 L680 375"
+        },
+        {
+          "id": "key-vault",
+          "from": "key",
+          "to": "vault",
+          "label": "Lấy credential store mặc định",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1280,
+              "y": 725
+            }
+          ],
+          "d": "M1040 725 L1280 725"
+        },
+        {
+          "id": "key-encrypt",
+          "from": "key",
+          "to": "encrypt",
+          "label": "Khóa được inject qua memory stack",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1080,
+              "y": 725
+            },
+            {
+              "x": 1080,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 725 L1080 725 L1080 375 L1280 375"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    },
+    "audit": {
+      "nodes": [
+        {
+          "id": "wrap",
+          "symbol": "wrap_tool_with_audit",
+          "label": "wrap_audit",
+          "file": "declaw/audit/tooling.py",
+          "line": 32,
+          "role": "Đưa audited_coroutine ra ngoài inner tool.",
+          "input": "StructuredTool, logger",
+          "output": "Audited StructuredTool",
+          "x": 80,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "call",
+          "symbol": "wrap_tool_with_audit.audited_coroutine",
+          "label": "audited_coroutine",
+          "file": "declaw/audit/tooling.py",
+          "line": 49,
+          "role": "Đo thời gian, chờ inner coroutine và ghi ToolCallEvent cho cả lỗi lẫn kết quả.",
+          "input": "Tool kwargs",
+          "output": "Kết quả gốc hoặc re-raised error",
+          "x": 680,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "db",
+          "symbol": "DbAuditLogger.emit",
+          "label": "db.emit",
+          "file": "declaw/audit/logger.py",
+          "line": 52,
+          "role": "Chuyển event sang DB row, dùng session và commit.",
+          "input": "AnyAuditEvent",
+          "output": "SQLite row",
+          "x": 1280,
+          "y": 255,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "monitor",
+          "symbol": "EgressMonitor.install",
+          "label": "monitor.install",
+          "file": "declaw/audit/egress.py",
+          "line": 53,
+          "role": "Instrument httpx trong lõi; không giám sát toàn hệ điều hành.",
+          "input": "Audit logger, allowlist",
+          "output": "HTTP wrappers",
+          "x": 80,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "event",
+          "symbol": "EgressMonitor._event",
+          "label": "network_event",
+          "file": "declaw/audit/egress.py",
+          "line": 117,
+          "role": "Tạo NetworkCallEvent và đánh dấu host ngoài allowlist.",
+          "input": "HTTP request và timing",
+          "output": "NetworkCallEvent",
+          "x": 680,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        },
+        {
+          "id": "quarantine",
+          "symbol": "QuarantineStore.add",
+          "label": "quarantine.add",
+          "file": "declaw/sanitizer/quarantine.py",
+          "line": 145,
+          "role": "Phát quarantine event qua sink được lắp khi tạo store.",
+          "input": "Unsafe content, source, verdict",
+          "output": "Quarantine record và event",
+          "x": 1280,
+          "y": 605,
+          "w": 360,
+          "h": 240
+        }
+      ],
+      "routes": [
+        {
+          "id": "wrap-call",
+          "from": "wrap",
+          "to": "call",
+          "label": "Dùng closure làm coroutine",
+          "kind": "construct",
+          "points": [
+            {
+              "x": 440,
+              "y": 375
+            },
+            {
+              "x": 680,
+              "y": 375
+            }
+          ],
+          "d": "M440 375 L680 375"
+        },
+        {
+          "id": "call-db",
+          "from": "call",
+          "to": "db",
+          "label": "await audit.emit(ToolCallEvent)",
+          "kind": "call",
+          "points": [
+            {
+              "x": 1040,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 375 L1280 375"
+        },
+        {
+          "id": "monitor-event",
+          "from": "monitor",
+          "to": "event",
+          "label": "HTTP wrapper tạo sự kiện",
+          "kind": "call",
+          "points": [
+            {
+              "x": 440,
+              "y": 725
+            },
+            {
+              "x": 680,
+              "y": 725
+            }
+          ],
+          "d": "M440 725 L680 725"
+        },
+        {
+          "id": "event-db",
+          "from": "event",
+          "to": "db",
+          "label": "Event được chuyển tới audit logger",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1040,
+              "y": 725
+            },
+            {
+              "x": 1075,
+              "y": 725
+            },
+            {
+              "x": 1075,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1040 725 L1075 725 L1075 375 L1280 375"
+        },
+        {
+          "id": "quarantine-db",
+          "from": "quarantine",
+          "to": "db",
+          "label": "Qua audit sink được cấu hình",
+          "kind": "data",
+          "points": [
+            {
+              "x": 1640,
+              "y": 725
+            },
+            {
+              "x": 1680,
+              "y": 725
+            },
+            {
+              "x": 1680,
+              "y": 535
+            },
+            {
+              "x": 1240,
+              "y": 535
+            },
+            {
+              "x": 1240,
+              "y": 375
+            },
+            {
+              "x": 1280,
+              "y": 375
+            }
+          ],
+          "d": "M1640 725 L1680 725 L1680 535 L1240 535 L1240 375 L1280 375"
+        }
+      ],
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1800,
+        "h": 1040
+      }
+    }
+  }
+}

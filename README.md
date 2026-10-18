@@ -1,74 +1,60 @@
-# DeClaw / Anatomy
+# DeClaw Atlas
 
-An interactive, Vietnamese architecture illustration of DeClaw, built with the [Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. A recognizable document-processing machine opens into source-backed circuit boards. All illustration code lives in this independent repository; nothing is added to the DeClaw application.
+A top-down, interactive map of DeClaw. Each software responsibility has a district and a functional landmark: a neural brain, a memory cabinet with a key vault, a document processor, a permission gate, a plugin connector, and more. Click a district to zoom into its source-backed functions and classes.
 
-![DeClaw document processor](assets/preview.png)
+All visualization code lives in this independent repository. Nothing is added to the DeClaw application.
 
-## Open the illustration
+![DeClaw Atlas](assets/preview.png)
 
-Download or clone this repository, then open **index.html** in a browser. It is self-contained: SVG, styles, content and JavaScript are embedded. No install, backend, API keys or model service is needed. `index-dark.html` opens with the dark theme.
+## Open
 
-For a local web preview with Node.js 20.10+:
-
-```sh
-npm run dev
-```
-
-Open http://127.0.0.1:4174. GitHub's file viewer displays HTML source, not the interactive page. GitHub Pages is not enabled; this repository remains private.
+Open **index.html** in a browser, or run `npm run dev` and visit http://127.0.0.1:4174. The HTML is self-contained: no install, backend, credentials, model service or external fonts. `index-dark.html` starts in dark mode. GitHub displays HTML source; download the files or use a local preview. The repository remains private; Pages is not enabled.
 
 ## Explore
 
-- Click a compartment or choose one of the 12 component buttons. The camera eases toward the selected assembly; **Mở lớp vỏ** lifts its cover and exposes a circuit board.
-- Each board has its own graph. Across the twelve boards, 76 chips refer to 60 distinct class/function definitions in DeClaw, linked to their exact source lines. Reused functions can appear in several compartments.
-- Click a chip for its responsibility, inputs, outputs and definition. Click one of the 72 connections to illuminate its two endpoints and inspect the relationship. Connections distinguish calls, data/dependencies, conditional branches and construction/registration; the connection tour is an exploration of relationships, not an execution trace.
-- Zoom controls let you read small features. **Trở lại** or Escape closes one exploration level; **Máy xử lý** returns to the whole machine. Transitions can be interrupted and replaced without a stale close hiding a new board.
-- Use the controls inside the figure to follow a request while watching the active mechanism change. The detailed journey section offers four flows: reading files, approved file changes, indexing, and document questions.
-- Choose denial or unsafe-content scenarios to inspect the alternate branches. Denied writes never reach filesystem execution; unsafe retrieved chunks are withheld.
-- Play, pause, step forward/backward or restart. With reduced motion, camera/cover changes are immediate and playback advances manually, one step per press. Arrow keys navigate the component buttons; Escape also pauses playback.
-- Share a hash URL to preserve the exploration level, selected symbol/connection, component, flow, outcome and step. Switch between light and dark themes.
-- Static, standalone SVG exports are in `assets/declaw-light.svg` and `assets/declaw-dark.svg`.
+- Click a district or its name below the map. The camera eases into the district and reveals its internal graph. Click a function to zoom closer and inspect its responsibility, inputs, outputs and exact source line.
+- Drag to pan. Use the wheel, two-finger pinch, or + / − to zoom. Wheel zoom stays anchored to the cursor. The ⊡ button fits the whole current level. Narrow panels start at a readable neighbourhood scale; pan to adjacent districts or use ⊡ for the complete map.
+- Follow the arrows from OUT ports to IN ports. Click a wire to highlight both endpoints, fit them into view, and inspect the typed relationship. Calls, data/dependencies, branches and construction/registration use different line patterns. Hover a district to reveal its neighbours; **Tất cả đường nối** reveals the complete overview wiring.
+- The inspector has keyboard-accessible symbol and relation lists. In narrow panels, **Chi tiết ↓** and **Về bản đồ ↑** move between the map and inspector.
+- Escape first clears a symbol/wire selection, then returns to the overview. The breadcrumb does the same return in one action. Arrow keys pan the focused map, + / − zoom, Home fits, and Tab + Enter opens a district or symbol.
+- Four request simulations cover reads, approved writes, document indexing and retrieval. Denied writes stop before filesystem execution. Unsafe reads/retrieved chunks are withheld. Reduced motion uses immediate camera changes and manual playback steps.
+- Hash URLs preserve district, symbol or wire, flow, outcome and step. Old `view=open` URLs still resolve. Browser Back/Forward follows district navigation.
 
-## Architecture grounding
+The map contains **12 districts**, **20 inter-district relations**, **76 symbol references to 60 distinct definitions**, and **72 internal relations**. A definition may appear in multiple responsibility views. Static SVG exports are in `assets/declaw-light.svg` and `assets/declaw-dark.svg`.
 
-Source: [NgoHung0704/DeClaw at 2f37214](https://github.com/NgoHung0704/DeClaw/tree/2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed).
+## Source grounding
 
-The machine, chips and traces are physical metaphors for software, not literal deployment hardware or electronic circuitry. DeClaw has one Python core, a separate Ollama service and a subprocess per loaded plugin. SQLite and ChromaDB are local storage dependencies. The picture does not represent twelve microservices.
+Source snapshot: [NgoHung0704/DeClaw at 2f37214](https://github.com/NgoHung0704/DeClaw/tree/2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed). The map is curated against this revision, not a live dependency scanner or telemetry display.
 
-The implemented CLI path is distinguished from planned gateway, connected desktop and shell sandbox work. The inspector explains that Chroma text payload encryption does not encrypt embedding vectors or all metadata, and the core-process HTTP observer is not an OS firewall.
+Districts represent responsibilities. Most modules share one local Python process. Ollama is a separate model service; each loaded plugin has a subprocess worker communicating through NDJSON stdio. SQLite and ChromaDB are local storage dependencies. The picture does not represent twelve microservices.
 
-Playback is an explanatory simulation, not application execution or telemetry. No Python source, credentials or user documents are bundled. Source links require access to the original repository.
+The inspector preserves scope: indexing does not classify the whole corpus; retrieval screens top-k chunks. Chroma text payload encryption does not encrypt vectors or all metadata. The core httpx observer is not an OS firewall. Memory views do not claim every memory type is automatically injected into every agent turn. FastAPI gateway, connected desktop and shell sandbox are deferred work.
 
-## Rebuild and verify
+No application source, user documents or secrets are bundled. Source links require access to the DeClaw repository.
+
+## Build and verify
+
+Node.js 20.10+; no npm dependencies:
 
 ```sh
 npm run build
 npm test
-npm run audit
 npm run test:browser
 npm run test:browser:reduced
-npm run test:inspection
-npm run test:inspection:reduced
-npm run test:lines
-# Optional: verify the exact definitions against a local application checkout:
 node scripts/check-sources.mjs /path/to/DeClaw
 ```
 
-No npm dependencies. The browser checks additionally require Chrome, Chromium or Edge; set `CHROME_PATH` if auto-discovery fails. The browser scripts use temporary, headless profiles.
-
-The build writes both HTML themes, static SVG exports and geometry metadata. A content-hashed, ignored `.cache/` reuses unchanged geometry when only interface code changes; `npm run audit` always recomputes and validates geometry. The preview PNG is a reviewed screenshot, not regenerated by the build.
-
-The verification suite passed: 6 model tests; 13 journey assertions per viewport; 43 desktop and 42 phone inspection assertions; all 76 source references; geometry audits; and all 26 line-end cases. See [verification notes](docs/verification.md) for the results and scope.
-
-## Files
+Browser integration tests use a temporary headless Chromium profile and exercise actual mouse dragging, wheel zoom and two-contact touch input. Set `CHROME_PATH` if discovery fails. Reports and test screenshots are ignored under `.verification/`. See [verification notes](docs/verification.md).
 
 | File | Purpose |
 | --- | --- |
-| `model.mjs` | Architecture content, source revision, pure journey and branch model |
-| `internals.mjs` | Source-backed symbols and typed relationships for all twelve boards |
-| `scripts/machine.mjs`, `scripts/cutaway.mjs` | Processor chassis, recorded geometry, lifting covers and circuit traces |
-| `scripts/build.mjs` | Cached geometry orchestration and standalone output |
-| `app.js`, `style.css` | Camera, cover transitions, symbol/wire inspectors, playback and responsive themes |
-| `docs/concept.md` | Concept and parts list written before geometry |
-| `vendor/anatomy/` | Pinned upstream kit and verification tools; MIT license retained |
+| `model.mjs` | Component descriptions, source revision and pure request simulations |
+| `internals.mjs` | Source definitions, contracts and typed internal relations |
+| `map.mjs` | Semantic landmarks, district layout, orthogonal routing and SVG rendering |
+| `app.js`, `style.css` | Camera, transitions, gestures, inspector, playback and responsive themes |
+| `scripts/build.mjs` | Standalone light/dark HTML and SVG exports |
+| `docs/map.json` | Generated district/node coordinates and relation routes |
 
-When DeClaw changes, review the actual code, update content and pinned source revision, rebuild, and rerun verification. Passing geometry/reference checks does not prove that architecture prose remains accurate.
+## Anatomy attribution
+
+This study began with the [Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. Versions 1–2 explored an isometric machine; version 3 follows the requested top-down map with purpose-built SVG landmarks. Earlier renderers remain in Git history. Vendored Anatomy files and their license remain under `vendor/anatomy`; its Chrome startup helper is used by the integration tests. The current page does not load the 3D kit.

@@ -1,17 +1,14 @@
 {
   "name": "declaw-architecture",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "audit": "node scripts/build.mjs --audit",
-    "test": "node --test scripts/model.test.mjs",
+    "audit": "node --test scripts/model.test.mjs scripts/map.test.mjs",
+    "test": "node --test scripts/model.test.mjs scripts/map.test.mjs",
     "test:browser": "node scripts/browser-check.mjs",
-    "test:browser:reduced": "node scripts/browser-check.mjs --reduced",
-    "test:inspection": "node scripts/inspection-check.mjs",
-    "test:inspection:reduced": "node scripts/inspection-check.mjs --reduced",
-    "test:lines": "node scripts/check-lines.mjs",
+    "test:browser:reduced": "node scripts/browser-check.mjs --phone --reduced",
     "dev": "node scripts/serve.mjs"
   }
 }

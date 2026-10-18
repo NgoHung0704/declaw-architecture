@@ -1,36 +1,119 @@
-import { spawnSync } from 'node:child_process';
-import { mkdirSync,writeFileSync } from 'node:fs';
-import { resolve,dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-mkdirSync(resolve(root,'.verification'),{recursive:true});
-const reduced=process.argv.includes('--reduced');
-const actions=[
-  ['eval',`window.checks=[];window.check=(condition,label)=>{checks.push({label,pass:!!condition});return !!condition};check(document.querySelectorAll('.stations button').length===12,'12 accessible component controls')`],
-  ['scroll','.iso-plate'],
-  ['click','[data-station="documents"][data-subject] .iso-top'],
-  ['eval',`check(document.querySelector('#details h2').textContent==='Document pipeline','SVG pointer selection')`],
-  ['eval',`(()=>{let ok=true;for(const button of document.querySelectorAll('.stations button')){button.click();ok&&=document.querySelector('#details h2').textContent===button.textContent.trim().slice(2).trim();}return check(ok,'All 12 inspectors render')})()`],
-  ['key','Home','.stations button'],
-  ['key','ArrowRight','.stations button'],
-  ['eval',`check(document.querySelector('#details h2').textContent==='Agent loop','Arrow-key component navigation')`],
-  ['eval',`(()=>{let ok=true;const expected={read:7,write:7,index:8,search:8};for(const [id,count] of Object.entries(expected)){document.querySelector('[data-journey="'+id+'"]').click();ok&&=document.querySelectorAll('[data-step]').length===count;for(let i=0;i<count;i++)document.querySelector('[data-step="'+i+'"]').click();ok&&=document.querySelector('#next').disabled;}return check(ok,'Four complete journeys with bounded steps')})()`],
-  ['eval',`document.querySelector('[data-journey="write"]').click();document.querySelector('#outcome').value='deny';document.querySelector('#outcome').dispatchEvent(new Event('change'));check(!document.querySelector('#steps').textContent.includes('Thực hiện thay đổi'),'Denied write never executes filesystem step')`],
-  ['eval',`(()=>{let ok=true;for(const flow of ['read','search']){document.querySelector('[data-journey="'+flow+'"]').click();document.querySelector('#outcome').value='unsafe';document.querySelector('#outcome').dispatchEvent(new Event('change'));ok&&=document.querySelector('#steps').textContent.includes('cách ly');}return check(ok,'Unsafe read/retrieval quarantine branches')})()`],
-  ['eval',`document.querySelector('[data-journey="read"]').click();document.querySelector('#quick-play').click();window.before=document.querySelector('#step-counter').textContent;check(${reduced?'true':`document.querySelector('#play').textContent==='Tạm dừng'`},'Quick playback starts')`],
-  ['wait',2800],
-  ['eval',`check(document.querySelector('#step-counter').textContent${reduced?'===':'!=='}window.before,'${reduced?'Reduced motion has no timed progression':'Playback advances from one shared model'}')`],
-  ['eval',`document.querySelector('#play').textContent==='Tạm dừng'&&document.querySelector('#quick-play').click();window.paused=document.querySelector('#step-counter').textContent`],
-  ['wait',2800],
-  ['eval',`check(document.querySelector('#step-counter').textContent===window.paused,'Pause stops progression');document.querySelector('#theme').click();check(document.body.dataset.theme==='dark','Theme toggle');document.querySelector('#theme').click();location.hash='component=plugins&flow=search&outcome=unsafe&step=6'`],
-  ['wait',100],
-  ['eval',`check(document.querySelector('#details h2').textContent==='Plugin host / doc-intel'&&document.querySelector('#outcome').value==='unsafe'&&document.querySelector('#step-counter').textContent.startsWith('06'),'Deep link restores component, branch and step');check(document.documentElement.scrollWidth<=innerWidth+1,'No horizontal overflow');({passed:checks.filter(v=>v.pass).length,total:checks.length,checks})`],
-];
-const file=resolve(root,`.verification/actions${reduced?'-reduced':''}.json`);
-writeFileSync(file,JSON.stringify(actions,null,2));
-const result=spawnSync(process.execPath,[resolve(root,'vendor/anatomy/verify/drive.mjs'),resolve(root,'index.html'),'--actions',file,'--width',reduced?'390':'1440','--height','1200',...(reduced?['--reduced']:[])],{cwd:root,encoding:'utf8',timeout:60000,windowsHide:true});
-process.stdout.write(result.stdout||'');process.stderr.write(result.stderr||'');
-const reports=(result.stdout||'').split('\n').filter(line=>line.startsWith('eval:')).map(line=>{try{return JSON.parse(line.slice(5));}catch{return null;}});
-const report=reports.findLast(v=>v&&typeof v==='object'&&Array.isArray(v.checks));
-if(result.status!==0||!report||report.passed!==report.total){console.error('Browser checks failed or did not finish.');process.exitCode=1;}
-else console.log(`Browser assertions passed: ${report.passed}/${report.total} (${reduced?'phone + reduced motion':'desktop'}).`);
+// Project integration tests: real mouse, wheel and two-finger touch through CDP.
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {existsSync,mkdirSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,join,sep} from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {chromePort} from '../vendor/anatomy/verify/chrome-port.mjs';
+import {internals} from '../internals.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const phone=process.argv.includes('--phone'),reduced=process.argv.includes('--reduced');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+if(typeof WebSocket==='undefined'){
+  const child=spawn(process.execPath,['--experimental-websocket',...process.argv.slice(1)],{stdio:'inherit',windowsHide:true});child.on('exit',code=>process.exit(code??1));
+}else await main();
+async function main(){
+  const binary=[process.env.CHROME_PATH,'C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(p=>p&&existsSync(p));
+  assert(binary,'Set CHROME_PATH to a Chromium browser');
+  const profile=mkdtempSync(join(tmpdir(),'declaw-atlas-test-'));
+  const chrome=spawn(binary,['--headless=new',...(process.platform==='win32'?['--do-not-de-elevate']:process.platform==='linux'?['--no-sandbox']:[]),'--remote-debugging-port=0',`--user-data-dir=${profile}`,'--no-first-run','--no-default-browser-check','--hide-scrollbars','--allow-file-access-from-files','about:blank'],{windowsHide:true});
+  let socket;const checks=[],errors=[];mkdirSync(resolve(root,'.verification'),{recursive:true});
+  const suffix=phone?'phone-reduced':'desktop';
+  try{
+    const port=await chromePort(chrome,profile),page=await(await fetch(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'})).json();
+    socket=new WebSocket(page.webSocketDebuggerUrl);let serial=0;const pending=new Map();
+    socket.onmessage=ev=>{const m=JSON.parse(ev.data);if(m.id){const item=pending.get(m.id);if(item){pending.delete(m.id);clearTimeout(item.timer);m.error?item.reject(new Error(m.error.message)):item.resolve(m.result);}}else if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails.exception?.description||m.params.exceptionDetails.text);};
+    await new Promise(r=>socket.onopen=r);
+    const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject,timer:setTimeout(()=>reject(new Error('CDP timeout: '+method)),15000)});socket.send(JSON.stringify({id,method,params}));});
+    const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result?.value;};
+    const check=async(expression,label)=>{const pass=!!await evaluate(expression);checks.push({label,pass});assert(pass,label);};
+    const until=async expression=>{const start=Date.now();while(!await evaluate(expression)){assert(Date.now()-start<3000,'Timed out: '+expression);await wait(35);}};
+    const click=selector=>evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
+    const box=selector=>evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.left,y:r.top,w:r.width,h:r.height}})()`);
+    const vb=()=>evaluate(`document.querySelector('#atlas').getAttribute('viewBox').split(' ').map(Number)`);
+    const settle=()=>until(`document.querySelector('#overview').hasAttribute('hidden')&&getComputedStyle(document.querySelector('#interior')).opacity==='1'`);
+    const shot=async name=>{const r=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});writeFileSync(resolve(root,`.verification/${name}-${suffix}.png`),Buffer.from(r.data,'base64'));};
+    const mouse=async(type,x,y)=>send('Input.dispatchMouseEvent',{type,x,y,...(type==='mouseWheel'?{deltaY:-120,deltaX:0}:type==='mouseMoved'?{buttons:1,button:'left'}:{button:'left',buttons:type==='mousePressed'?1:0,clickCount:1})});
+    const key=async key=>{await send('Input.dispatchKeyEvent',{type:'keyDown',key});await send('Input.dispatchKeyEvent',{type:'keyUp',key});};
+    await send('Runtime.enable');await send('Page.enable');
+    await send('Emulation.setDeviceMetricsOverride',{width:phone?390:1440,height:phone?900:1100,deviceScaleFactor:1,mobile:phone});
+    if(reduced)await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+    await send('Page.navigate',{url:pathToFileURL(resolve(root,'index.html')).href});await until(`document.querySelector('#steps button')`);await wait(100);
+    await check(`document.querySelectorAll('[data-district]').length===12&&document.querySelectorAll('.district-directory button').length===12`,'Twelve map districts and keyboard alternatives');
+    await check(`new Set([...document.querySelectorAll('[data-district] .landmark')].map(n=>n.innerHTML)).size===12`,'Every district has its own functional landmark');
+    await check(`document.querySelectorAll('.overview-wire').length===20`,'Twenty typed inter-component relations');
+    await check(`document.querySelector('#overview').hasAttribute('hidden')===false&&!document.querySelector('#interior').getClientRects().length`,'Overview starts with internals hidden');
+    await shot('overview');
+    const p0=await vb(),r=await box('#atlas'),cx=r.x+r.w*.52,cy=r.y+r.h*.48;
+    await mouse('mousePressed',cx,cy);await mouse('mouseMoved',cx+40,cy+30);await mouse('mouseReleased',cx+40,cy+30);
+    const p1=await vb();assert(p1[0]!==p0[0]&&p1[1]!==p0[1],'Pointer drag pans the overview');checks.push({label:'Pointer drag pans without opening a district',pass:true});
+    await check(`!document.querySelector('#overview').hasAttribute('hidden')`,'Dragging across a district does not activate it');
+    const worldBefore={x:p1[0]+.52*p1[2],y:p1[1]+.48*p1[3]};await mouse('mouseWheel',cx,cy);await wait(100);const p2=await vb();
+    assert(p2[2]<p1[2]);assert(Math.abs(p2[0]+.52*p2[2]-worldBefore.x)<2&&Math.abs(p2[1]+.48*p2[3]-worldBefore.y)<2,JSON.stringify({p1,p2,worldBefore}));checks.push({label:'Real wheel zoom preserves the cursor anchor',pass:true});
+    await click('#fit-view');await wait(reduced?30:850);const beforeOpen=await vb();await click('.district-directory [data-open="documents"]');
+    if(!reduced){await wait(160);await check(`Number(document.querySelector('#atlas').getAttribute('viewBox').split(' ')[2])<${beforeOpen[2]}&&Number(document.querySelector('#atlas').getAttribute('viewBox').split(' ')[2])>350`,'Camera eases between overview and detail');}
+    await settle();await check(`document.querySelectorAll('#interior [data-node]').length===8&&document.querySelectorAll('#interior [data-wire]').length===7`,'Documents opens its eight source nodes and seven relations');
+    await check(`document.querySelector('.input-band')&&document.querySelector('.output-band')&&document.querySelectorAll('#interior .in-port').length===8&&document.querySelectorAll('#interior .out-port').length===8`,'District boundary and every symbol expose input/output');
+    await shot('documents');
+    const beforeDetail=await vb(),dr=await box('#atlas');await mouse('mousePressed',dr.x+dr.w*.45,dr.y+dr.h*.48);await mouse('mouseMoved',dr.x+dr.w*.45+35,dr.y+dr.h*.48-25);await mouse('mouseReleased',dr.x+dr.w*.45+35,dr.y+dr.h*.48-25);
+    assert((await vb())[0]!==beforeDetail[0]);checks.push({label:'Pointer drag also pans the internal map',pass:true});
+    await click('#fit-view');await wait(reduced?30:850);
+    await click('#details [data-inspect-node="search"]');await wait(reduced?30:850);
+    await check(`document.querySelector('#details h2').textContent==='search_documents'&&document.querySelector('#details .source-link').href.endsWith('search.py#L98')`,'Symbol inspection shows exact function, contract and source line');
+    assert((await vb())[2]<beforeDetail[2]);checks.push({label:'Selecting a symbol zooms to a readable card',pass:true});
+    await click('#details [data-relation="search-filter"]');
+    await check(`document.querySelectorAll('#interior .symbol.endpoint').length===2&&document.querySelector('#details h2').textContent.includes('chunk_sanitizer.filter')`,'Selecting a wire exposes its relationship and exactly two endpoints');
+    await check(`document.querySelectorAll('.wire-pulse').length===${reduced?'0':'1'}`,'Signal animation respects reduced motion');
+    await click('#clear-selection');await click('#fit-view');await wait(reduced?30:850);
+    // A true two-contact gesture exercises pointer capture, distance and moving center.
+    await send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:2});
+    const tr=await box('#atlas'),tx=tr.x+tr.w*.5,ty=tr.y+tr.h*.5,pinchBefore=await vb();
+    const touch=(type,d)=>send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x:tx-d,y:ty,id:1},{x:tx+d,y:ty,id:2}]});
+    await touch('touchStart',40);await touch('touchMove',75);await touch('touchEnd');await wait(100);
+    assert((await vb())[2]<pinchBefore[2]*.8);checks.push({label:'Two-finger pinch zooms the internal map',pass:true});
+    await send('Emulation.setTouchEmulationEnabled',{enabled:false});
+    // Rapid retargeting must not leave the old overview or old graph visible.
+    await click('#home-view');await wait(100);await click('.district-directory [data-open="plugins"]');await wait(100);await click('.district-directory [data-open="memory"]');await settle();
+    await check(`document.querySelector('#details h2').textContent==='Memory'&&document.querySelector('#interior [data-node="key"]')&&document.querySelectorAll('#interior .interior-ground').length===1`,'Interrupted transitions preserve only the requested district');
+    for(const [id,g]of Object.entries(internals)){
+      await click(`.district-directory [data-open="${id}"]`);await settle();
+      await check(`document.querySelectorAll('#interior [data-node]').length===${g.nodes.length}&&document.querySelectorAll('#interior [data-wire]').length===${g.edges.length}`,`Correct distinct graph: ${id}`);
+      await click(`#details [data-inspect-node="${g.nodes.at(-1).id}"]`);
+      await check(`document.querySelector('#details .source-link').href.endsWith('#L${g.nodes.at(-1).line}')`,`Source contract resolves: ${id}`);
+    }
+    await key('Escape');await key('Escape');await until(`!document.querySelector('#overview').hasAttribute('hidden')&&document.querySelector('#interior').hasAttribute('hidden')`);
+    await evaluate(`document.querySelector('#overview [data-wire="agent-tools"]').focus()`);await key('Enter');
+    await check(`document.querySelectorAll('#overview .district.neighbor').length===2&&document.querySelector('#details h2').textContent==='Tool calls → observations'`,'Keyboard selection reveals an overview connection and its two districts');
+    await click('#all-wires');await check(`document.querySelector('#atlas').classList.contains('show-all')`,'Overview wiring can be made fully visible');await click('#all-wires');
+    await click('.district-directory [data-open="agent"]');await settle();await click('.district-directory [data-open="memory"]');await settle();
+    await evaluate(`history.back()`);await until(`document.querySelector('#map-title').textContent.startsWith('Brain')`);await check(`document.querySelector('#interior [data-node="think"]')`,'Browser Back restores the previous district');
+    await evaluate(`history.forward()`);await until(`document.querySelector('#map-title').textContent.startsWith('Memory')`);await check(`document.querySelector('#interior [data-node="key"]')`,'Browser Forward restores the next district');
+    await click('#home-view');await wait(reduced?30:850);
+    for(const [id,count]of Object.entries({read:7,write:7,index:8,search:8})){
+      await evaluate(`document.querySelector('#flow').value='${id}';document.querySelector('#flow').dispatchEvent(new Event('change'))`);
+      await check(`document.querySelectorAll('[data-step]').length===${count}`,`Complete request journey: ${id}`);
+    }
+    await evaluate(`document.querySelector('#flow').value='write';document.querySelector('#flow').dispatchEvent(new Event('change'));document.querySelector('#outcome').value='deny';document.querySelector('#outcome').dispatchEvent(new Event('change'))`);
+    await check(`![...document.querySelectorAll('[data-step]')].some(n=>n.getAttribute('aria-label').includes('Thực hiện thay đổi'))`,'Denied write never reaches execution');
+    for(const flow of ['read','search']){
+      await evaluate(`document.querySelector('#flow').value='${flow}';document.querySelector('#flow').dispatchEvent(new Event('change'));document.querySelector('#outcome').value='unsafe';document.querySelector('#outcome').dispatchEvent(new Event('change'))`);
+      await check(`[...document.querySelectorAll('[data-step]')].some(n=>n.getAttribute('aria-label').includes('cách ly'))`,`Unsafe ${flow} quarantines content`);
+    }
+    await click('#play');const atPlay=await evaluate(`document.querySelector('#step-counter').textContent`);await wait(2550);
+    assert.equal((await evaluate(`document.querySelector('#step-counter').textContent`))===atPlay,reduced);checks.push({label:reduced?'Reduced motion advances manually':'Playback progresses automatically',pass:true});
+    await evaluate(`document.querySelector('#play').getAttribute('aria-label').startsWith('Tạm')&&document.querySelector('#play').click();location.hash='component=memory&view=open&node=encrypt&flow=read&outcome=normal&step=2'`);await wait(100);
+    await check(`document.querySelector('#details h2').textContent==='encrypt_text'&&document.querySelector('#step-counter').textContent.startsWith('02')`,'Legacy source deep links restore the same symbol and flow');
+    await click('#theme');await check(`document.body.dataset.theme==='dark'`,'Dark theme');await shot('detail-dark');await click('#theme');
+    await check(`document.documentElement.scrollWidth<=innerWidth+1`,'No horizontal page overflow');
+    assert.deepEqual(errors,[]);checks.push({label:'No browser runtime exceptions',pass:true});
+    await evaluate(`document.querySelector('.brand').click();scrollTo(0,0)`);await wait(reduced?50:850);await shot('final');
+    console.log(JSON.stringify({viewport:suffix,passed:checks.length,checks},null,2));
+  }catch(error){console.error(error);process.exitCode=1;}
+  finally{
+    writeFileSync(resolve(root,`.verification/report-${suffix}.json`),JSON.stringify({checks,errors},null,2));
+    socket?.close();chrome.kill('SIGKILL');await wait(300);
+    const resolvedProfile=resolve(profile),safePrefix=resolve(tmpdir())+sep;
+    if(resolvedProfile.startsWith(safePrefix)&&resolvedProfile.includes('declaw-atlas-test-'))try{rmSync(resolvedProfile,{recursive:true,force:true});}catch{}
+  }
+}

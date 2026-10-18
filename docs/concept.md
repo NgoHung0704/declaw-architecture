@@ -1,20 +1,11 @@
-# Hero 02 — A desktop document processor
+# Atlas design
 
-## Concept before geometry
+The overview is a top-down map of responsibilities. Functional landmarks carry the meaning: Brain's neuron connections, Memory's cabinet and vault lock, Tools' wrench and screwdriver, Documents' sheets and chunking station, Sanitizer's shield and filter, Approval's checkpoint, Workspace's folder, Storage's SQL cylinder and vector nodes, Ollama's model chip, Plugins' connector, Audit's event ledger and the CLI terminal.
 
-Replace the collection of independent workbench instruments with one recognizable desktop document scanner/processor. An input paper tray feeds a scan tunnel, a screening chamber and an output tray; a front console operates the same chassis. Controller boards, removable plugin cartridge, storage bay and event recorder are mounted in the body. The model appliance occupies a distinct rear docking bay. Shapes are metaphors for responsibilities, not deployment hardware.
+The visual hierarchy is district → source symbol → relation. A district opens directly into its graph through a camera transition and crossfade at the district's map position. Functions have left IN and right OUT ports; district-wide input and output bands explain the overall contract. Selected connections fit both endpoint cards and highlight only the relevant relationship. The inspector provides full explanations and pinned source links when map labels are abbreviated.
 
-Interaction: select a compartment → the camera eases from the overview to that compartment → open its housing → the cover lifts and exposes a circuit board. Each chip represents a real, source-linked function/class. Select a chip to inspect its contract, or select a trace to see the exact relation and direction of data/calls. Return reverses the transition. Reduced motion uses the same states immediately. Interrupted transitions must start from the visible camera position and must not reopen a previous compartment.
+District routes are curated relationships. Calls point to the callee; awaited results return to the caller. Other patterns identify data/dependencies, conditional branches and construction/registration. Routes avoid all node interiors and attach to their visible ports. Crossings and shared routes can occur; selection isolates each relation. This is not a literal network deployment, circuit or runtime trace.
 
-## Parts
+Both map levels support dragging, cursor-anchored wheel zoom, pinch zoom, fit and keyboard navigation. Transitions start from the visible camera pose and can be cancelled by gestures or replaced by a new district selection. Narrow panels start closer, with the complete scene always available through Fit. Node selection zooms closer, while full contracts remain accessible through the inspector.
 
-- Chassis: four padded feet, heavy rounded plinth, deck, back spine, front skirt, left/right cheeks, inset nameplate, front runner and fasteners.
-- Feed path: input tray floor, two side fences, rear stop, three paper sheets; scan bed, two towers, bridge, reader head, hood; screening bed, side posts and lid; output bed, two fences and output sheet.
-- Front interface: sloped-style console pedestal, display case, recessed display, keyboard strip; tool switchboard, four keys; approval latch and release button.
-- Rear bays: controller substrate, controller package and heat fins; plugin dock, two guide rails and cartridge; memory substrate, packages and vault contact plate; separate Ollama dock, appliance and three adapter windows.
-- Storage and audit: storage bay, two removable drives and pull tabs; recorder bed, platen, paper strip and head.
-- Each opened compartment: board support, PCB, grounded rim, mounting screws, one package per symbol with pin pads, logical printed traces with terminal pads, removable cover. Full cover geometry is recorded in closed and raised poses; traces are explicitly a schematic of software relations, not physical wiring or actual electric signals.
-
-## Truth and inspection
-
-All 12 modules have their own graph, not a shared placeholder graph. Each node names a definition in the pinned DeClaw revision with a verified source line. Graphs show representative relationships, not every implementation detail. Existing request journeys remain separate from the internal relationship viewer: construction edges are not presented as runtime execution order.
+The source model remains deliberately separate from the renderer. Architecture descriptions and internal references are tied to DeClaw revision `2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed`. All content is curated; changes in DeClaw require updating and verifying the model.

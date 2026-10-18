@@ -1,5 +1,5 @@
 // Each edge names its real relationship: a call, a supplied value, a branch,
-// or construction. Physical circuit boards are an explanatory metaphor.
+// or construction. Repeated definitions are references in different districts.
 const n=(id,symbol,label,file,line,role,input,output)=>({id,symbol,label,file,line,role,input,output});
 const e=(from,to,label,kind='call')=>({id:`${from}-${to}`,from,to,label,kind});
 export const internals={
