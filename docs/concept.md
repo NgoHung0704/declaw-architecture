@@ -1,31 +1,20 @@
-# Figure 01 — The document workbench
+# Hero 02 — A desktop document processor
 
-## Concept, before geometry
+## Concept before geometry
 
-A precision document-processing workbench. A terminal submits a job to a controller; a switchboard selects typed operations, a physical latch stands for human approval, document trays and a press stand for parsing/retrieval, a screening station holds untrusted text, and filing drawers hold state. A separate model appliance and removable parser cartridge represent real process boundaries. The physical forms are an explanatory metaphor, not DeClaw's deployment hardware.
+Replace the collection of independent workbench instruments with one recognizable desktop document scanner/processor. An input paper tray feeds a scan tunnel, a screening chamber and an output tray; a front console operates the same chassis. Controller boards, removable plugin cartridge, storage bay and event recorder are mounted in the body. The model appliance occupies a distinct rear docking bay. Shapes are metaphors for responsibilities, not deployment hardware.
 
-Selecting a station illuminates its working surface. A guided job moves the focus between mechanisms; the step readout and active mechanism come from one pure journey model. No invented performance counters or live telemetry.
+Interaction: select a compartment → the camera eases from the overview to that compartment → open its housing → the cover lifts and exposes a circuit board. Each chip represents a real, source-linked function/class. Select a chip to inspect its contract, or select a trace to see the exact relation and direction of data/calls. Return reverses the transition. Reduced motion uses the same states immediately. Interrupted transitions must start from the visible camera position and must not reopen a previous compartment.
 
-## Parts list
+## Parts
 
-- Base: deck, four feet, front rail, two rail stops, index strip, recessed border, corner fasteners.
-- CLI terminal: pedestal, lower case, screen housing, screen inlay, keyboard tray, keys.
-- Agent controller: pedestal, circuit base, controller package, retaining frame, status inlay, pins.
-- Tool switchboard: pedestal, mounting board, four typed-tool keys, registration strip.
-- Approval latch: pedestal, two pillars, crossbar, latch slide, decision button.
-- Workspace tray: pedestal, tray floor, rear wall, two side walls, document leaves.
-- Document press: pedestal, bed, two uprights, upper bridge, chunk strip.
-- Sanitizer inspection station: pedestal, tray, two fences, safe-content window, quarantine pocket.
-- Plugin cartridge dock: pedestal, dock base, two guide walls, removable cartridge, connector pins.
-- Memory filing unit: pedestal, cabinet shell, two drawer fronts, two handles, index tabs.
-- Storage drawer bank: pedestal, cabinet shell, two drawer fronts, two handles, catalog tabs.
-- Ollama appliance: pedestal, chassis, cooling hood, cooling slots, three session inlays.
-- Audit recorder: pedestal, recorder bed, paper platen, paper strip, recording head, event marks.
+- Chassis: four padded feet, heavy rounded plinth, deck, back spine, front skirt, left/right cheeks, inset nameplate, front runner and fasteners.
+- Feed path: input tray floor, two side fences, rear stop, three paper sheets; scan bed, two towers, bridge, reader head, hood; screening bed, side posts and lid; output bed, two fences and output sheet.
+- Front interface: sloped-style console pedestal, display case, recessed display, keyboard strip; tool switchboard, four keys; approval latch and release button.
+- Rear bays: controller substrate, controller package and heat fins; plugin dock, two guide rails and cartridge; memory substrate, packages and vault contact plate; separate Ollama dock, appliance and three adapter windows.
+- Storage and audit: storage bay, two removable drives and pull tabs; recorder bed, platen, paper strip and head.
+- Each opened compartment: board support, PCB, grounded rim, mounting screws, one package per symbol with pin pads, logical printed traces with terminal pads, removable cover. Full cover geometry is recorded in closed and raised poses; traces are explicitly a schematic of software relations, not physical wiring or actual electric signals.
 
-Every drawn solid is recorded with its true rounded slab geometry. No pipes, implied network cables or exploded deployment boundaries. Both themes share the same geometry. The drawing stays assembled; details are in the inspector rather than fictitious floating layers.
+## Truth and inspection
 
-## Grounding
-
-DeClaw commit: 2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed. Reviewed the working source and README; only unrelated .claude/settings.json was modified. Source references link to the pinned commit; no Python source is copied into this repository.
-
-Anatomy kit commit: e9488296a44211c42701ff71705b7901470ec78f. MIT attribution retained in vendor/anatomy/LICENSE.
+All 12 modules have their own graph, not a shared placeholder graph. Each node names a definition in the pinned DeClaw revision with a verified source line. Graphs show representative relationships, not every implementation detail. Existing request journeys remain separate from the internal relationship viewer: construction edges are not presented as runtime execution order.
