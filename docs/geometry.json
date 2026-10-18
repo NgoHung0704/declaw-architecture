@@ -1,0 +1,79 @@
+{
+  "parts": 80,
+  "projection": {
+    "origin": [
+      505.7326400099466,
+      348.03943742607765
+    ],
+    "scale": 1.1502507646163977,
+    "azimuth": 38,
+    "elevation": 38
+  },
+  "stations": [
+    {
+      "id": "cli",
+      "x": -156,
+      "y": -7
+    },
+    {
+      "id": "agent",
+      "x": -52,
+      "y": -7
+    },
+    {
+      "id": "tools",
+      "x": 52,
+      "y": -7
+    },
+    {
+      "id": "approval",
+      "x": 156,
+      "y": -7
+    },
+    {
+      "id": "workspace",
+      "x": -156,
+      "y": 78
+    },
+    {
+      "id": "documents",
+      "x": -52,
+      "y": 78
+    },
+    {
+      "id": "sanitizer",
+      "x": 52,
+      "y": 78
+    },
+    {
+      "id": "storage",
+      "x": 156,
+      "y": 78
+    },
+    {
+      "id": "ollama",
+      "x": -156,
+      "y": -92
+    },
+    {
+      "id": "plugins",
+      "x": -52,
+      "y": -92
+    },
+    {
+      "id": "memory",
+      "x": 52,
+      "y": -92
+    },
+    {
+      "id": "audit",
+      "x": 156,
+      "y": -92
+    }
+  ],
+  "source": {
+    "repo": "https://github.com/NgoHung0704/DeClaw",
+    "commit": "2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed"
+  },
+  "anatomy": "e9488296a44211c42701ff71705b7901470ec78f"
+}

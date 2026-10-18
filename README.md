@@ -1,37 +1,64 @@
-# DeClaw Architecture
+# DeClaw / Anatomy
 
-Independent home for an interactive Anatomy illustration of DeClaw. This repository keeps visualization code and assets outside the application repository.
+An interactive, Vietnamese architecture illustration of DeClaw, built with the [Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. All illustration code lives in this independent repository; nothing is added to the DeClaw application.
 
-## Status
+![DeClaw document workbench](assets/preview.png)
 
-Repository initialized. The Anatomy illustration has not been implemented yet.
+## Open the illustration
 
-## Source of truth
+Download or clone this repository, then open **index.html** in a browser. It is self-contained: SVG, styles, content and JavaScript are embedded. No install, backend, API keys or model service is needed. `index-dark.html` opens with the dark theme.
 
-Application: https://github.com/NgoHung0704/DeClaw
+For a local web preview with Node.js 20.10+:
 
-DeClaw is one local Python application, with a separate Ollama service and one local subprocess per loaded plugin. SQLite and ChromaDB are storage dependencies, not HTTP microservices.
+```sh
+npm run dev
+```
 
-Implemented areas to illustrate:
+Open http://127.0.0.1:4174. GitHub's file viewer displays HTML source, not the interactive page. GitHub Pages is not enabled; this repository remains private.
 
-- Typer CLI and REPL; LangGraph agent loop.
-- Typed tool registry, human approval for non-READ operations, workspace file tools.
-- Document indexing, content-hash catalog, embeddings, retrieval and citations.
-- Plugin host and doc-intel subprocess communicating through NDJSON over stdio.
-- External-content sanitizer using a separate classifier session; unsafe content quarantine.
-- Episodic and semantic memory, SQLite records, ChromaDB vectors, OS keyring.
-- Audit events and the core-process HTTP observer.
+## Explore
 
-The FastAPI gateway, connected desktop UI and shell sandbox are planned, not part of the working CLI path.
+- Click any mechanism or choose one of the 12 component buttons. The inspector explains responsibilities, input/output, internals, boundaries and pinned source references.
+- Use the controls inside the figure to follow a request while watching the active mechanism change. The detailed journey section offers four flows: reading files, approved file changes, indexing, and document questions.
+- Choose denial or unsafe-content scenarios to inspect the alternate branches. Denied writes never reach filesystem execution; unsafe retrieved chunks are withheld.
+- Play, pause, step forward/backward or restart. With reduced motion, playback advances manually, one step per press. Arrow keys navigate the component buttons; Escape pauses playback.
+- Share a hash URL to preserve component, flow, outcome and step. Switch between light and dark themes.
+- Static, standalone SVG exports are in `assets/declaw-light.svg` and `assets/declaw-dark.svg`.
 
-## Illustration plan
+## Architecture grounding
 
-Use Anatomy: https://github.com/wheresryan22/anatomy (MIT).
+Source: [NgoHung0704/DeClaw at 2f37214](https://github.com/NgoHung0704/DeClaw/tree/2f37214e73cbbdadc8d037ce78d6c0e81a73a1ed).
 
-Build a detailed isometric document-processing workbench: an input tray, agent controller, approval gate, document-processing station, isolated plugin bay, storage drawers, model unit and audit recorder. Selecting each mechanism reveals its actual software responsibility and source references. Guided playback will cover file reads, approved changes, indexing and document retrieval. Playback is an explanatory simulation, not execution telemetry.
+The workbench is a physical metaphor for software, not literal deployment hardware. DeClaw has one Python core, a separate Ollama service and a subprocess per loaded plugin. SQLite and ChromaDB are local storage dependencies. The picture does not represent twelve microservices.
 
-Ship a standalone interactive HTML page with SVG geometry, light/dark themes, keyboard controls and reduced-motion support. Keep application source and document contents out of this repository; link to source paths and record the source commit when the figure is built.
+The implemented CLI path is distinguished from planned gateway, connected desktop and shell sandbox work. The inspector explains that Chroma text payload encryption does not encrypt embedding vectors or all metadata, and the core-process HTTP observer is not an OS firewall.
 
-## Hosting
+Playback is an explanatory simulation, not application execution or telemetry. No Python source, credentials or user documents are bundled. Source links require access to the original repository.
 
-This repository starts private. GitHub Pages is not enabled. Choose hosting and visibility after reviewing the completed visualization.
+## Rebuild and verify
+
+```sh
+npm run build
+npm test
+npm run audit
+npm run test:browser
+npm run test:browser:reduced
+```
+
+No npm dependencies. The browser checks additionally require Chrome, Chromium or Edge; set `CHROME_PATH` if auto-discovery fails. The browser scripts use temporary, headless profiles.
+
+The build writes both HTML themes, static SVG exports and geometry metadata. The preview PNG is a reviewed screenshot, not regenerated by the build.
+
+Validation completed: geometry audit with 80 true recorded solids, zero support/collision/depth failures; zero floating line ends in both themes; 4 model tests; 13 browser assertions on desktop and 13 at 390px with reduced motion. All 36 unique source paths were checked against the DeClaw checkout. Screenshots and 4x close-ups were visually reviewed. See [verification notes](docs/verification.md).
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| `model.mjs` | Architecture content, source revision, pure journey and branch model |
+| `scripts/build.mjs` | Isometric mechanisms, recorded geometry, depth sorting, standalone output |
+| `app.js`, `style.css` | Inspector, playback, deep links, keyboard controls, responsive themes |
+| `docs/concept.md` | Concept and parts list written before geometry |
+| `vendor/anatomy/` | Pinned upstream kit and verification tools; MIT license retained |
+
+When DeClaw changes, review the actual code, update content and pinned source revision, rebuild, and rerun verification. Passing geometry/reference checks does not prove that architecture prose remains accurate.

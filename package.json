@@ -1,0 +1,14 @@
+{
+  "name": "declaw-architecture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "audit": "node scripts/build.mjs --audit",
+    "test": "node --test scripts/model.test.mjs",
+    "test:browser": "node scripts/browser-check.mjs",
+    "test:browser:reduced": "node scripts/browser-check.mjs --reduced",
+    "dev": "node scripts/serve.mjs"
+  }
+}
